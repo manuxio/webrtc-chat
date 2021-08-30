@@ -72,11 +72,11 @@ const ipcRequestFailure = (request, requestId, errorMessage) => ({
   }
 });
 
-const ipcRequestStarted = (request, requestId, response) => ({
+const ipcRequestStarted = (request, requestId, args) => ({
   type: IPCREQUEST_STARTED,
   payload: {
     request,
     requestId,
-    response
+    args
   }
 });

@@ -61,7 +61,6 @@ class App extends Component {
     // console.log('App History', history);
     // console.log('Navigating to /dashboard/');
     // history.replace('/dashboard/');
-    console.log('Did mount?', history.location.pathname);
     if (history.location.pathname === '/chat.html') {
       history.replace('/dashboard/');
     }

@@ -1,0 +1,1 @@
+export const MESSAGES_BULK_LOAD = 'MESSAGES_BULK_LOAD';

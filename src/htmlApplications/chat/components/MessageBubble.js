@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
@@ -52,7 +52,7 @@ const useStyles = makeStyles(({ palette, spacing }) => {
     left: {
       borderTopRightRadius: radius,
       borderBottomRightRadius: radius,
-      backgroundColor: palette.grey[100],
+      backgroundColor: '#414c52',
     },
     right: {
       borderTopLeftRadius: radius,

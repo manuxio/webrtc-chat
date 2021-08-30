@@ -14,6 +14,7 @@ import ListItemButton from '@material-ui/core/ListItemButton';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import TagIcon from '@material-ui/icons/Tag';
+import { Link } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 /*
 .css-1wudjvl-MuiPaper-root-MuiAccordion-root.Mui-expanded
@@ -151,8 +152,10 @@ class MyChatMenu extends Component {
 
   generateChannelsList() {
     const {
-      channels
+      channels,
+      history
     } = this.props;
+
     if (!channels) {
       return null;
     }
@@ -162,7 +165,9 @@ class MyChatMenu extends Component {
     }
     const subElements = myChannels.map((c) => {
       return (
-        <ListItemButton key={c._id}>
+        <ListItemButton key={c._id} onClick={() => {
+          history.push(`/chat/${c._id}`);
+        }}>
           <ListItemIcon>
             <TagIcon />
           </ListItemIcon>

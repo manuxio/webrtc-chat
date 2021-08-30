@@ -17,6 +17,7 @@ import ipcCloseme from './libs/ipcListeners/closeme';
 import ipcLogin from './libs/ipcListeners/login';
 import ipcGetRandomNumber from './libs/ipcListeners/getRandomNumber';
 import ipcChannels from './libs/ipcListeners/ipcChannels';
+import ipcMessages from './libs/ipcListeners/ipcMessages';
 import appConfig from './libs/config.js';
 import sysInformation from './libs/sysInformation';
 import appStateObserver from './libs/observers/appState';
@@ -110,6 +111,7 @@ app.whenReady()
       ipcCloseme(app, appState, appConfig, runningApps, appSockets);
       ipcGetRandomNumber(app, appState, appConfig, runningApps, appSockets);
       ipcChannels(app, appState, appConfig, runningApps, appSockets);
+      ipcMessages(app, appState, appConfig, runningApps, appSockets);
       log.info('App is ready!');
 
       const apps = Object.keys(appstarters);

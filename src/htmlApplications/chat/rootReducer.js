@@ -8,6 +8,8 @@ import appState from './reducers/appState';
 import login from './reducers/login';
 import ipcRequests from './reducers/ipcRequests';
 import channels from './reducers/channels';
+import messages from './reducers/messages';
+
 
 // Use ES6 object literal shorthand syntax to define the object shape
 const rootReducer = combineReducers({
@@ -17,7 +19,8 @@ const rootReducer = combineReducers({
   appState,
   login,
   ipcRequests,
-  channels
+  channels,
+  messages
 })
 
 export default rootReducer;

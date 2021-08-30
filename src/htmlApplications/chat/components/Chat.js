@@ -13,6 +13,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Stack from '@material-ui/core/Stack';
 import ChatMenu from './ChatMenu';
 import ChatNoChannel from './ChatNoChannel';
+import ChatChannel from './ChatChannel';
 import { NavLink, Route } from 'react-router-dom';
 
 import '../styles/App.css';
@@ -106,8 +107,7 @@ class Chat extends Component {
           <Route exact path="/chat/">
             <ChatNoChannel />
           </Route>
-          <Route path="/chat/:channel">
-          </Route>
+          <Route path="/chat/:channel" component={ChatChannel} />
         </Box>
       </Stack>
       </>
