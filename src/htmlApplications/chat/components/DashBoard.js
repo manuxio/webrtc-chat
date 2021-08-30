@@ -9,6 +9,8 @@ import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import { withRouter } from "react-router";
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
+import { doInvoke } from '../actions/ipcRequest';
 
 import '../styles/App.css';
 
@@ -35,8 +37,11 @@ const mapStateToProps = (state) => {
   }
 };
 
-const mapDispatchToProps = () => {
+const mapDispatchToProps = (dispatch) => {
   return {
+    doGetRandomNumber: (arg, callback) => {
+      return doInvoke('getRandomNumber:request', arg, callback)(dispatch);
+    }
   };
 };
 
@@ -87,6 +92,16 @@ class DashBoard extends Component {
         neque doloribus, cupiditate numquam dignissimos laborum fugiat deleniti? Eum
         quasi quidem quibusdam.
       </Typography>
+      <Button
+        onClick={() => {
+          this.props.doGetRandomNumber()
+            .then(
+              (result) => {
+                console.log('Result', result);
+              }
+            )
+        }}
+      >doGetRandomNumber</Button>
       <Typography variant="body2" gutterBottom>
         body2. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos
         blanditiis tenetur unde suscipit, quam beatae rerum inventore consectetur,

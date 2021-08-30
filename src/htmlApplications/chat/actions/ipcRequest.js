@@ -30,7 +30,8 @@ export const doInvoke = (request, arg, callback) => {
           if (callback && typeof callback === 'function') {
             callback(null, response, request, requestId);
           }
-          return response.result;
+          // console.log('Result here', response, response.result);
+          return response.result || response;
         }
       )
       .catch(
