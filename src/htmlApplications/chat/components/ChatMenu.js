@@ -1,7 +1,7 @@
 import React, { Component, Suspense } from 'react';
 import { connect } from 'react-redux';
 import { withTranslation } from 'react-i18next';
-import withEvents from '../libs/withEvents';
+// import withEvents from '../libs/withEvents';
 import { withRouter } from "react-router";
 import Accordion from '@material-ui/core/Accordion';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
@@ -14,7 +14,7 @@ import ListItemButton from '@material-ui/core/ListItemButton';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import TagIcon from '@material-ui/icons/Tag';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 /*
 .css-1wudjvl-MuiPaper-root-MuiAccordion-root.Mui-expanded
@@ -103,12 +103,12 @@ const mainTheme = createTheme({
 
 const mapStateToProps = (state) => {
   return {
-    todo: state.todo,
-    ping: state.ping,
-    login: state.login,
-    appState: state.appState,
-    user: state.appState.user,
-    connected: state.appState.connected,
+    // todo: state.todo,
+    // ping: state.ping,
+    // login: state.login,
+    // appState: state.appState,
+    // user: state.appState.user,
+    // connected: state.appState.connected,
     channels: state.channels.channels
   }
 };
@@ -153,7 +153,8 @@ class MyChatMenu extends Component {
   generateChannelsList() {
     const {
       channels,
-      history
+      history,
+      location
     } = this.props;
 
     if (!channels) {
@@ -166,7 +167,10 @@ class MyChatMenu extends Component {
     const subElements = myChannels.map((c) => {
       return (
         <ListItemButton key={c._id} onClick={() => {
-          history.push(`/chat/${c._id}`);
+            // console.log('location', location);
+            if (location.pathname !== `/chat/${c._id}`) {
+              history.push(`/chat/${c._id}`);
+            }
         }}>
           <ListItemIcon>
             <TagIcon />
@@ -241,7 +245,7 @@ class MyChatMenu extends Component {
   }
 }
 
-const MyComponent = connect(mapStateToProps, mapDispatchToProps)(withTranslation('chat')(withEvents(withRouter(MyChatMenu))));
+const MyComponent = connect(mapStateToProps, mapDispatchToProps)(withTranslation('chat')(withRouter(MyChatMenu)));
 export default function App() {
   return (
     <Suspense fallback="loading">

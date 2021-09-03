@@ -6,7 +6,7 @@ import withEvents from '../libs/withEvents';
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import '../styles/App.css';
 
@@ -17,7 +17,10 @@ const mainTheme = createTheme({
       main: '#ff2a65'
     },
     primary: {
-      main: '#e8912d'
+      main: '#2D94E8'
+    },
+    success: {
+      main: '#368539'
     },
     text: {
       primary: '#f2f2f2'
@@ -30,11 +33,11 @@ const mainTheme = createTheme({
 
 const mapStateToProps = (state) => {
   return {
-    todo: state.todo,
-    ping: state.ping,
-    login: state.login,
-    appState: state.appState,
-    user: state.appState.user,
+    // todo: state.todo,
+    // ping: state.ping,
+    // login: state.login,
+    // appState: state.appState,
+    // user: state.appState.user,
     connected: state.appState.connected
   }
 };

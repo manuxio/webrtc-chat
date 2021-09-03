@@ -15,8 +15,8 @@ const hideOnClose = true;
 const animate = true;
 const animateClose = true;
 const animation = 'easeOutQuint';
-const animXRef = 'right';
-const animYRef = 'bottom';
+// const animXRef = 'right';
+// const animYRef = 'bottom';
 const startAppOnClose = '';
 const animationDuration = 2000;
 const startTopOffset = 0;
@@ -25,8 +25,11 @@ const startLeftOffset = -280;
 const endLeftOffset = -280;
 const borderLess = true;
 const autoShow = true;
-
+const flash = true;
+const autoFocus = true;
 export default {
+  flash,
+  autoFocus,
   name,
   id,
   startAppOnClose,

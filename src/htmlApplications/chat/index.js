@@ -1,3 +1,5 @@
+import './wdyr'; // <--- first import
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/App.js';
@@ -19,6 +21,14 @@ const store = configureAppStore({
 });
 
 window.onload = function(){
+  window.document.body.addEventListener('click', event => {
+    if (event.target.tagName.toLowerCase() === 'a') {
+      if (event.target.href.indexOf('http') > -1) {
+        event.preventDefault();
+        require("electron").shell.openExternal(event.target.href);
+      }
+    }
+  });
   ReactDOM.render(
     <Provider store={store}>
       <Router>

@@ -1,4 +1,5 @@
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
+// import { namedReducerEnhancer } from "redux-named-reducers";
 
 // import monitorReducersEnhancer from './enhancers/monitorReducers'
 // import loggerMiddleware from './middleware/logger'
@@ -9,12 +10,11 @@ export default function configureAppStore(preloadedState) {
     reducer: rootReducer,
     middleware: [...getDefaultMiddleware()],
     preloadedState,
-    // enhancers: [monitorReducersEnhancer]
+    // enhancers: [namedReducerEnhancer]
   })
 
   if (process.env.NODE_ENV !== 'production' && module.hot) {
     module.hot.accept("./rootReducer", () => {
-      console.log('Here!');
       store.replaceReducer(require("./rootReducer").default)
     });
   }

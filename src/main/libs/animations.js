@@ -87,6 +87,15 @@ export const showAndAnimate = (appState, win, appDef) => {
       setTimeout(() => {
         tick(win, myAppDef, easing, startTime);
       }, 17);
+    } else {
+      if (appDef.autoFocus) {
+        win.focus();
+      } else if (appDef.flash && win.flashFrame) {
+        win.flashFrame(true)
+        win.once('focus', () => {
+          win.flashFrame(false)
+        });
+      }
     }
   };
   win.show();

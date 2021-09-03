@@ -22,6 +22,7 @@ export const startApplication = async (appState, runningApps, appName) => {
   const appUrl = `${urlPrefix}${appDef.appUrl}`;
   const fnc = appDef.borderLess ? createBorderlessWindow : createWindow;
   runningApps[appName] = await fnc(appUrl, appDef.browserOptions);
+  runningApps[appName].appName = appName;
   if (appDef.autoShow) {
     runningApps[appName].once('ready-to-show', () => {
       log.info(`Showing ${appName} app.`);
@@ -53,6 +54,7 @@ export const startApplication = async (appState, runningApps, appName) => {
       }
     });
   }
+
   runningApps[appName].once('closed', () => {
     log.info(`App ${appName} closed.`);
     if (runningApps[appName].__trayIcon) {

@@ -13,7 +13,8 @@ import MoreHoriz from '@material-ui/icons/MoreHoriz';
 const useStyles = makeStyles(({ palette, spacing }) => {
   const radius = spacing(2.5);
   const size = 30;
-  const rightBgColor = palette.primary.main;
+  const rightBgColor = palette.primary.dark;
+  const leftBgColor = palette.success.dark;
   // if you want the same as facebook messenger, use this color '#09f'
   return {
     avatar: {
@@ -52,7 +53,7 @@ const useStyles = makeStyles(({ palette, spacing }) => {
     left: {
       borderTopRightRadius: radius,
       borderBottomRightRadius: radius,
-      backgroundColor: '#414c52',
+      backgroundColor: leftBgColor,
     },
     right: {
       borderTopLeftRadius: radius,
@@ -75,9 +76,9 @@ const useStyles = makeStyles(({ palette, spacing }) => {
     iconBtn: {
       opacity: 0,
       padding: 6,
-      color: 'rgba(0,0,0,0.34)',
+      color: 'rgba(255,255,255,0.34)',
       '&:hover': {
-        color: 'rgba(0,0,0,0.87)',
+        color: 'rgba(255,255,255,0.87)',
       },
       margin: '0 4px',
       '& svg': {
@@ -127,7 +128,7 @@ const MessageBubble = ({ avatar, messages, side }) => {
                     align={'left'}
                     className={cx(styles.msg, styles[side], attachClass(i))}
                   >
-                    {msg}
+                    <div dangerouslySetInnerHTML={{__html: msg }} />
                   </Typography>
                 )}
                 {typeof msg === 'object' && msg.type === 'image' && (

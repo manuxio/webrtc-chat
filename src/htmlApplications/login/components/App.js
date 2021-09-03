@@ -4,13 +4,13 @@ import { withTranslation } from 'react-i18next';
 import Avatar from '@material-ui/core/Avatar';
 import LoadingButton from '@material-ui/lab/LoadingButton';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
+// import TextField from '@material-ui/core/TextField';
 import withEvents from '../libs/withEvents';
 import Box from '@material-ui/core/Box';
 import IconButton from '@material-ui/core/IconButton';
 import Input from '@material-ui/core/Input';
-import FilledInput from '@material-ui/core/FilledInput';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
+// import FilledInput from '@material-ui/core/FilledInput';
+// import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputLabel from '@material-ui/core/InputLabel';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -44,6 +44,7 @@ const mapStateToProps = (state) => {
     todo: state.todo,
     ping: state.ping,
     login: state.login,
+    appConfig: state.appConfig,
     appState: state.appState,
     user: state.appState.user,
     connected: state.appState.connected
@@ -67,20 +68,29 @@ const mapDispatchToProps = dispatch => {
 class LegacyComponent extends Component {
   constructor(props) {
     super(props);
+    console.log('Login props', props);
     this.state = {
-      username: '',
-      password: '',
+      username: props.appConfig.autoLogin && props.appConfig.autoLogin.username ? props.appConfig.autoLogin.username : '',
+      password: props.appConfig.autoLogin && props.appConfig.autoLogin.password ? props.appConfig.autoLogin.password : '',
       showPassword: false
     }
   }
   componentDidUpdate(prevProps) {
     // console.log('appState', this.props.appState);
     // Typical usage (don't forget to compare props):
-    if (this.props.connected !== prevProps.connected) {
-      console.log('Requesting close');
+    if (this.props.connected && this.props.connected !== prevProps.connected) {
       closeMe(1000);
     }
   }
+
+  componentDidMount() {
+    if (this.props.appConfig.autoLogin) {
+      if (this.state.username && this.state.password) {
+        this.props.doLogin(this.state.username, this.state.password);
+      }
+    }
+  }
+
   render() {
     const {
       username,
@@ -89,7 +99,7 @@ class LegacyComponent extends Component {
     } = this.state;
     const {
       loggingIn,
-      loggedIn,
+      // loggedIn,
       loginError,
     } = this.props.login;
     const { t } = this.props;
@@ -147,6 +157,7 @@ class LegacyComponent extends Component {
             <FormControl error={loginError} disabled={loggingIn} fullWidth required variant="standard">
               <InputLabel htmlFor="outlined-username">{t("Username")}</InputLabel>
               <Input
+                autofocus
                 id="outlined-username"
                 type={'text'}
                 value={username}
@@ -200,7 +211,6 @@ class LegacyComponent extends Component {
               sx={{ mt: 3, mb: 2 }}
               onClick={() => {
                 if (username && username.length > 0 && password && password.length > 0) {
-                  console.log('Logging in!');
                   this.props.doLogin(username, password);
                 }
               }}

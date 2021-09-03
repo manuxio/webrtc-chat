@@ -6,7 +6,7 @@ const initialState = {
   channels: undefined
 };
 
-export default function channelsReducer(state = initialState, action) {
+export default function channelsReducer (state = initialState, action) {
   // console.log('In Reducer', action);
   switch (action.type) {
     case CHANNELS_UPDATE: {
@@ -24,3 +24,4 @@ export default function channelsReducer(state = initialState, action) {
       return state;
   }
 }
+

@@ -1,9 +1,11 @@
 import React, { Component, Suspense } from 'react';
 import { connect } from 'react-redux';
 import { withTranslation } from 'react-i18next';
-import withEvents from '../libs/withEvents';
+// import withEvents from '../libs/withEvents';
 import Box from '@material-ui/core/Box';
 import CssBaseline from '@material-ui/core/CssBaseline';
+// import Badge from '@material-ui/core/Badge';
+
 
 import ForumOutlinedIcon from '@material-ui/icons/ForumOutlined';
 import PlaylistAddCheckOutlinedIcon from '@material-ui/icons/PlaylistAddCheckOutlined';
@@ -50,13 +52,13 @@ FancyLink.displayName = 'MyLink';
 const MyNavLink = (props) => {
   const {
     to,
-    match,
+    // match,
     location
   } = props;
   const isActive = location.pathname.includes(to);
   return (
     <NavLink to={to}>
-      <FancyLink active={isActive} icon={props.icon} />
+      <FancyLink active={isActive} icon={props.icon || props.children} />
     </NavLink>
   )
 }
@@ -105,7 +107,9 @@ class AppSkeleton extends Component {
             alignItems="center"
             spacing={1}
             >
-              <MyNavLink to="/dashboard/" match={match} location={location} icon={<DashboardOutlinedIcon />} />
+              <MyNavLink to="/dashboard/" match={match} location={location}>
+                <DashboardOutlinedIcon />
+              </MyNavLink>
               <MyNavLink to="/chat/" match={match} location={location} icon={<ForumOutlinedIcon />} />
               <MyNavLink to="/todos/" match={match} location={location} icon={<PlaylistAddCheckOutlinedIcon />} />
             </Stack>
@@ -133,7 +137,7 @@ class AppSkeleton extends Component {
   }
 }
 
-const MyComponent = connect(mapStateToProps, mapDispatchToProps)(withTranslation('chat')(withEvents(withRouter(AppSkeleton))));
+const MyComponent = connect(mapStateToProps, mapDispatchToProps)(withTranslation('chat')(withRouter(AppSkeleton)));
 export default function App() {
   return (
     <Suspense fallback="loading">

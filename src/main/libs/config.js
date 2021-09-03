@@ -1,7 +1,11 @@
-import isDev from 'electron-is-dev';
 import fullConfig from '../../../config/config.json';
 import os from 'os';
 import fs from 'fs';
+const electron = require('electron');
+let isDev = true;
+if (typeof electron !== 'string') {
+  isDev = require('electron-is-dev');
+}
 
 const configPath = '../../../config';
 const hostname = os.hostname();

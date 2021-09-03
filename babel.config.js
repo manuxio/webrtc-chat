@@ -1,5 +1,3 @@
-/* eslint global-require: off, import/no-extraneous-dependencies: off */
-
 const developmentEnvironments = ['development', 'test'];
 
 const developmentPlugins = [require('@babel/plugin-transform-runtime')];
@@ -23,7 +21,11 @@ module.exports = (api) => {
       // @babel/preset-env will automatically target our browserslist targets
       require('@babel/preset-env'),
       require('@babel/preset-typescript'),
-      [require('@babel/preset-react'), { development }],
+      ['@babel/preset-react', {
+        runtime: 'automatic',
+        development: development,
+        importSource: '@welldone-software/why-did-you-render',
+      }]
     ],
     plugins: [
       // Stage 0

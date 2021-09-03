@@ -1,0 +1,66 @@
+.ql-emoji {
+  width: 19px;
+  height: 19px;
+  margin-right: 0.125rem;
+  margin-left: 0.125rem;
+  margin-bottom: -0.21rem;
+  vertical-align: baseline;
+  cursor: default;
+}
+@supports not (-moz-appearance: none) {
+  .ql-emoji {
+    margin-bottom: 0;
+    vertical-align: text-top;
+  }
+}
+@media screen\0 {
+  .ql-emoji {
+    pointer-events: none;
+  }
+}
+
+.ql-editor {
+  vertical-align: baseline;
+  font-size: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+}
+
+.ql-snow .ql-fill,
+.ql-snow .ql-stroke.ql-fill {
+  fill: #ccc;
+}
+
+.ql-snow .ql-stroke {
+  stroke: #ccc;
+}
+
+.ql-editor.ql-blank::before {
+  color: rgb(150 150 150 / 60%);
+}
+
+.ql-toolbar.ql-snow {
+  border: 1px solid #263237;
+}
+
+.ql-container.ql-snow {
+  border: 1px solid #263237;
+}
+
+/* .ql-editor {
+  vertical-align: baseline;
+  font-size: 1.25rem;
+}
+.ql-editor p,
+.ql-editor ol,
+.ql-editor ul,
+.ql-editor pre,
+.ql-editor blockquote,
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3,
+.ql-editor h4,
+.ql-editor h5,
+.ql-editor h6 {
+  min-height: 1.75rem;
+} */

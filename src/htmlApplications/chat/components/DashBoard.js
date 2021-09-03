@@ -1,11 +1,11 @@
 import React, { Component, Suspense } from 'react';
 import { connect } from 'react-redux';
 import { withTranslation } from 'react-i18next';
-import AppSkeleton from './AppSkeleton';
+// import AppSkeleton from './AppSkeleton';
 import withEvents from '../libs/withEvents';
-import Backdrop from '@material-ui/core/Backdrop';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import { createTheme, ThemeProvider } from '@material-ui/core/styles';
+// import Backdrop from '@material-ui/core/Backdrop';
+// import CircularProgress from '@material-ui/core/CircularProgress';
+// import { createTheme } from '@material-ui/core/styles';
 import { withRouter } from "react-router";
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
@@ -14,17 +14,17 @@ import { doInvoke } from '../actions/ipcRequest';
 
 import '../styles/App.css';
 
-const mainTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    secondary: {
-      main: '#ff2a65'
-    },
-    primary: {
-      main: '#e8912d'
-    }
-  },
-});
+// const mainTheme = createTheme({
+//   palette: {
+//     mode: 'dark',
+//     secondary: {
+//       main: '#ff2a65'
+//     },
+//     primary: {
+//       main: '#e8912d'
+//     }
+//   },
+// });
 
 const mapStateToProps = (state) => {
   return {

@@ -1,34 +1,44 @@
 import { createSelector } from 'reselect';
 
-const getThisMessages = (state, props) => {
-  const {
-    channel: channelId
-  } = props.match.params;
-  // console.log('State', state);
-  return state.messages.messages.filter((m) => m.channel === channelId);
-}
-const getThisChannel = (state, props) => {
-  const {
-    channel: channelId
-  } = props.match.params;
-  const chan = state.channels.channels.reduce((prev, curr) => {
-    if (curr._id === channelId) return curr;
-    return prev;
-  }, null);
-  // console.log('Chan', chan);
-  return chan;
+const getChannelId = (state, props) => {
+  return props.channelId;
 }
 
+const getAllMessages = (state) => {
+  return state.messages.messages;
+};
+
+const getAllChannels = (state) => {
+  console.log('getAllChannels state', state);
+  return state.channels.channels;
+};
+
+const getUser = (state) => {
+  return state.appState.user;
+};
+
 export const getMessages = createSelector(
-  [ getThisMessages ],
-  (messages) => {
-    return messages;
+  [ getChannelId, getAllMessages ],
+  (channelId, messages) => {
+    console.log('Executing out getMessages function');
+    return messages.filter((m) => m.channel === channelId);
+  }
+);
+
+export const getMe = createSelector(
+  [ getUser ],
+  ( user ) => {
+    return user;
   }
 );
 
 export const getChannel = createSelector(
-  [ getThisChannel ],
-  (channel) => {
-    return channel;
+  [ getChannelId, getAllChannels ],
+  (channelId, channels) => {
+    console.log('Executing out getChannel function');
+    return channels.reduce((prev, curr) => {
+      if (curr._id === channelId) return curr;
+      return prev;
+    }, null);
   }
 );

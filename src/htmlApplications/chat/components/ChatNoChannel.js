@@ -4,7 +4,7 @@ import { withTranslation } from 'react-i18next';
 import withEvents from '../libs/withEvents';
 import { withRouter } from "react-router";
 import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
+// import Button from '@material-ui/core/Button';
 import ForumOutlinedIcon from '@material-ui/icons/ForumOutlined';
 import { doInvoke } from '../actions/ipcRequest';
 import Typography from '@material-ui/core/Typography';
@@ -46,9 +46,9 @@ class ChatNoChannel extends Component {
   }
 
   render() {
-    const {
-      buttonFace
-    } = this.state;
+    // const {
+    //   buttonFace
+    // } = this.state;
     return (
       <>
         <Box

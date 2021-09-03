@@ -1,1 +1,4 @@
 export const MESSAGES_BULK_LOAD = 'MESSAGES_BULK_LOAD';
+export const MESSAGES_NEW = 'MESSAGES_NEW';
+export const MESSAGES_NEW_REMOTE = 'messages:new';
+export const MESSAGES_UPDATEONE = 'MESSAGES_UPDATEONE';

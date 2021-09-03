@@ -11,9 +11,10 @@ module.exports = {
   ],
   rules: {
     // A temporary hack related to IDE not resolving correct package.json
-    'import/no-extraneous-dependencies': 'off',
+    // 'import/no-extraneous-dependencies': 'off',
     'react/jsx-filename-extension': 'off',
-    'no-case-declarations': 'off'
+    'no-case-declarations': 'off',
+    'react/prop-types': 'off'
   },
   parserOptions: {
     ecmaVersion: 2020,
