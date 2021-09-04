@@ -1,7 +1,8 @@
 import { doInvoke } from './ipcRequest';
 
 import {
-  CHANNELS_UPDATE
+  CHANNELS_UPDATE,
+  CHANNELS_SET_VISIBLE
 } from '../actiontypes/channels.js';
 
 const log = require('electron-log');
@@ -19,7 +20,16 @@ export const loadMyChannels = (dispatch) => {
       log.error(e);
     }
   )
+}
 
+export const setVisible = (dispatch) => {
+  return (channelId, visible = true) => {
+    let val = channelId;
+    if (typeof channelId === 'object' && channelId._id) {
+      val = channelId._id;
+    }
+    dispatch(channelSetVisible(val, visible));
+  }
 }
 
 export const setChannels = (dispatch) => {
@@ -27,6 +37,14 @@ export const setChannels = (dispatch) => {
     dispatch(channelsUpdate(channels));
   }
 }
+
+const channelSetVisible = (channelId, visible) => ({
+  type: CHANNELS_SET_VISIBLE,
+  payload: {
+    channelId,
+    visible
+  }
+});
 
 const channelsUpdate = (channels) => ({
   type: CHANNELS_UPDATE,

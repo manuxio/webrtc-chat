@@ -15,6 +15,7 @@ import ChatEditor from './ChatEditor2';
 import { getMessages, getChannel, getMe } from './selectors/chatChannel';
 import MessageBubble from './MessageBubble';
 import { doInvoke } from '../actions/ipcRequest';
+import { setVisible } from '../actions/channels';
 import { loadBulkMessagesByChannelId, sendMessageAction } from '../actions/messages';
 import ForumOutlinedIcon from '@material-ui/icons/ForumOutlined';
 import Typography from '@material-ui/core/Typography';
@@ -48,6 +49,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     sendMessage: (...args) => {
       return sendMessageAction(dispatch)(...args);
+    },
+    setChannelVisible: (...args) => {
+      return setVisible(dispatch)(...args);
     }
   };
 };
@@ -66,13 +70,28 @@ class ChatChannel extends Component {
     const {
       messages,
       channel,
-      loadBulkMessagesByChannelId
+      loadBulkMessagesByChannelId,
+      setChannelVisible
     } = this.props;
+    const {
+      isVisible
+    } = channel;
     if (messages.length === 0) {
       loadBulkMessagesByChannelId({ _id: channel._id });
     } else {
       this.scrollBars.scrollToBottom();
     }
+    if (!isVisible) {
+      setChannelVisible(channel._id);
+    }
+  }
+
+  componentWillUnmount() {
+    const {
+      channel,
+      setChannelVisible
+    } = this.props;
+    setChannelVisible(channel._id, false);
   }
 
   componentDidUpdate(prevProps) {
@@ -102,10 +121,14 @@ class ChatChannel extends Component {
       messages,
       user
     } = this.props;
+    if (!user) {
+      return null;
+    }
     return messages.reduce((prev, curr) => {
       // const side = ['left', 'right'][Math.floor(Math.random()*2)];
+      // console.log('User', user);
       let side = 'left';
-      if (curr.from._id === user._id) {
+      if (curr && curr.from && curr.from._id === user._id) {
         side = 'right';
       }
       const last = prev.slice(-1).pop();
