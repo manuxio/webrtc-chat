@@ -35,7 +35,11 @@ export default function channelsReducer (state = initialState, action) {
 
       return {
         ...state,
-        channels,
+        channels: channels.map((c) => ({
+          ...c,
+          unseenMessages: 0,
+          unseenMentionedMessages: 0
+        })),
         updateTime: new Date().getTime()
       };
     }

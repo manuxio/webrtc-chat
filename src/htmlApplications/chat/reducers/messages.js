@@ -2,6 +2,7 @@
 //   CHANNELS_UPDATE
 // } from '../actiontypes/channels';
 
+// import messages from 'main/libs/socketlisteners/messages.js';
 import {
   MESSAGES_BULK_LOAD,
   MESSAGES_NEW,
@@ -11,7 +12,7 @@ import {
 
 
 const initialState = {
-  messages: []
+  messages: {},
 };
 
 export default function messagesReducer(state = initialState, action, fullState) {
@@ -24,6 +25,9 @@ export default function messagesReducer(state = initialState, action, fullState)
       if (!channelsContainer) {
         return state;
       }
+      const {
+        messages
+      } = state;
       const {
         channels
       } = channelsContainer;
@@ -47,39 +51,83 @@ export default function messagesReducer(state = initialState, action, fullState)
       const newMessage = action.payload;
       return {
         ...state,
-        messages: state.messages.concat([newMessage])
+        messages: {
+          ...messages,
+          [channel]: state.messages[channel].concat([newMessage])
+        }
       };
     }
 
     case MESSAGES_BULK_LOAD: {
+      // const {
+      //   channels
+      // } = state;
+      const {
+        messages
+      } = action.payload;
+      console.log('Action', action, messages);
+      // messages.sort((a, b) => {
+      //   if (a.date > b.date) return 1;
+      //   if (b.date < b.date) return -1;
+      //   return 0
+      // })
+      // .forEach((m) => {
+      //   const {
+      //     channel
+      //   } = m;
+      //   if (!channels[channel]) {
+      //     channels[channel] = [];
+      //   }
+      //   channels[channel].push(m);
+      // });
       return {
         ...state,
-        messages: state.messages.concat(action.payload.messages)
+        messages: { ...messages }
       };
     }
 
     case MESSAGES_NEW: {
       const newMessage = action.payload.message;
+      const {
+        messages
+      } = state;
+      const {
+        channel
+      } = newMessage;
+      if (!messages[channel]) { messages[channel] = []}
+      // messages[channel] = [...messages[channel], newMessage];
+      console.log('messages', messages);
       return {
         ...state,
-        messages: state.messages.concat([newMessage])
+        messages: {
+          ...messages,
+          [channel]: messages[channel].concat([newMessage])
+        }
       };
     }
 
     case MESSAGES_UPDATEONE: {
+      console.log('IN MESSAGES_UPDATEONE', action);
       const newMessageProps = action.payload.data;
       const oldMessageId = action.payload.oldMessageId;
+      const channelId = action.payload.channelId;
+      const {
+        messages
+      } = state;
+      console.log('messages[channel]', channelId, messages, messages[channelId]);
       return {
         ...state,
-        messages: state.messages.map((m) => {
-          if (m._id !== oldMessageId) {
-            // console.log('Different message id');
-            return m;
-          }
-          // console.log('Found message id', oldMessageId);
-          const newO = Object.assign({}, m, newMessageProps);
-          return newO;
-        })
+        messages: {
+          ...messages,
+          [channelId]: messages[channelId].map((m) => {
+            if (m._id !== oldMessageId) {
+              // console.log('Different message id');
+              return m;
+            }
+            const newO = Object.assign({}, m, newMessageProps);
+            return newO;
+          })
+        }
       };
     }
     // case CHANNELS_UPDATE: {

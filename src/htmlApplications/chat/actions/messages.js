@@ -60,7 +60,7 @@ export const sendMessageAction = (dispatch) => {
           if (!result || result.error) {
             throw new Error(result ? result.errorMessage : 'Unable to send');
           }
-          dispatch(updateMessage(myTempId, result));
+          dispatch(updateMessage(channel._id, myTempId, result));
           return result;
         }
       )
@@ -87,9 +87,10 @@ const newMessageAction = (message) => ({
   }
 })
 
-const updateMessage = (oldMessageId, data) => ({
+const updateMessage = (channelId, oldMessageId, data) => ({
   type: MESSAGES_UPDATEONE,
   payload: {
+    channelId,
     oldMessageId,
     data
   }
