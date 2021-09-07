@@ -8,6 +8,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import { withRouter } from "react-router-dom";
 import { loadMyChannels } from '../actions/channels';
+import { getLastMessageDateByChannels } from './selectors/chatMessages';
+// import log from 'electron-log';
 
 import '../styles/App.css';
 
@@ -32,13 +34,14 @@ const mainTheme = createTheme({
   }
 });
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, props, getState) => {
   return {
     // todo: state.todo,
     // ping: state.ping,
     // login: state.login,
     // appState: state.appState,
     // user: state.appState.user,
+    lastMessagesByChannel: getLastMessageDateByChannels(state, props, getState),
     connected: state.appState.connected,
     channels: state.channels.channels
   }
@@ -46,8 +49,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    loadMyChannels: () => {
-      loadMyChannels(dispatch);
+    loadMyChannels: (...args) => {
+      loadMyChannels(dispatch)(...args);
     }
   };
 };
@@ -69,18 +72,43 @@ class App extends Component {
     // console.log('App History', history);
     // console.log('Navigating to /dashboard/');
     // history.replace('/dashboard/');
+    console.log('App remounted?');
+    const {
+      lastMessagesByChannel,
+      loadMyChannels
+    } = this.props;
+    // console.log('[TODO] Update channels and messages!!!', lastMessagesByChannel);
+    const options = Object.keys(lastMessagesByChannel).reduce((prev, curr) => {
+      prev[curr] = {
+        date: { $gt: lastMessagesByChannel[curr] }
+      };
+      return prev;
+    }, {});
+    loadMyChannels(options);
     if (history.location.pathname === '/chat.html') {
       history.replace('/dashboard/');
-    } else {
-       const {
-         channels,
-         loadMyChannels
-       } = this.props;
-       if (typeof channels === 'undefined') {
-         loadMyChannels();
-       }
     }
     // console.log('App did mount', history.location);
+  }
+
+  componentDidUpdate(prevProps) {
+    // console.log('App Reconnect?', this.props.connected && this.props.connected !== prevProps.connected);
+    if (this.props.connected && this.props.connected !== prevProps.connected) {
+      // console.log('Closing in 1 second');
+      // closeMe(1000);
+      const {
+        lastMessagesByChannel,
+        loadMyChannels
+      } = this.props;
+      // console.log('[TODO] Update channels and messages!!!', lastMessagesByChannel);
+      const options = Object.keys(lastMessagesByChannel).reduce((prev, curr) => {
+        prev[curr] = {
+          date: { $gt: lastMessagesByChannel[curr] }
+        };
+        return prev;
+      }, {});
+      loadMyChannels(options);
+    }
   }
 
   render() {

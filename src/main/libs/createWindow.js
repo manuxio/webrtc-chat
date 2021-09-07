@@ -26,6 +26,7 @@ const createWindow = async (filenameOrUrl, options = {}) => {
   // console.log('Loading url', `file://${__dirname}/${filename}`);
   tmpWin.loadURL(filenameOrUrl);
   tmpWin.removeMenu();
+  // console.log('Window created with id', tmpWin.id);
   return tmpWin;
 }
 

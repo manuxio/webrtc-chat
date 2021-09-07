@@ -9,13 +9,23 @@ import {
 import { ipcRenderer } from 'electron';
 let requestCnt = 0;
 
-export const doInvoke = (request, arg, callback) => {
+export const doInvoke = (...originalArgs) => {
+  const [request, ...newArgs] = originalArgs;
+  let callback = newArgs.pop();
+  const arg = newArgs;
+  if (typeof callback !== 'function') {
+    arg.push(callback);
+    callback = undefined;
+  }
+
+  // console.log('Finally', arg);
+  // console.log('Do Invoke', arg);
   return (dispatch/*, getState*/) => {
     // const state = getState();
     requestCnt++;
     const requestId = `REQ_${requestCnt}`;
     dispatch(ipcRequestStarted(request, requestId, arg));
-    return ipcRenderer.invoke(request, arg)
+    return ipcRenderer.invoke(request, ...arg)
       .then(
         (response) => {
           dispatch(ipcRequestSuccess(request, requestId, response));

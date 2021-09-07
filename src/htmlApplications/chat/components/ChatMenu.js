@@ -8,7 +8,7 @@ import AccordionDetails from '@material-ui/core/AccordionDetails';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { loadMyChannels } from '../actions/channels';
+// import { loadMyChannels } from '../actions/channels';
 import List from '@material-ui/core/List';
 import ListItemButton from '@material-ui/core/ListItemButton';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -115,11 +115,11 @@ const mapStateToProps = (state) => {
   }
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (/* dispatch */) => {
   return {
-    loadMyChannels: () => {
-      loadMyChannels(dispatch);
-    }
+    // loadMyChannels: () => {
+    //   loadMyChannels(dispatch);
+    // }
   };
 };
 
@@ -135,13 +135,13 @@ class MyChatMenu extends Component {
   }
 
   componentDidMount() {
-    const {
-      channels,
-      loadMyChannels
-    } = this.props;
-    if (typeof channels === 'undefined') {
-      loadMyChannels();
-    }
+    // const {
+    //   channels,
+    //   loadMyChannels
+    // } = this.props;
+    // if (typeof channels === 'undefined') {
+    //   loadMyChannels();
+    // }
   }
 
   setExpanded(panel, expanded) {

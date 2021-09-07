@@ -79,6 +79,7 @@ class LegacyComponent extends Component {
     // console.log('appState', this.props.appState);
     // Typical usage (don't forget to compare props):
     if (this.props.connected && this.props.connected !== prevProps.connected) {
+      // console.log('Closing in 1 second');
       closeMe(1000);
     }
   }

@@ -5,7 +5,7 @@ const getChannelId = (state, props) => {
 }
 
 const getAllMessages = (state) => {
-  console.log('MMMM', state.messages);
+  // console.log('MMMM', state.messages);
   return state.messages.messages;
 };
 
@@ -22,7 +22,7 @@ export const getMessages = createSelector(
   [ getChannelId, getAllMessages ],
   (channelId, messagesByChannel) => {
     // console.log('Executing out getMessages function');
-    console.log('EXXXX', messagesByChannel);
+    // console.log('EXXXX', messagesByChannel);
     return messagesByChannel[channelId];
     // return messages.filter((m) => m.channel === channelId);
   }

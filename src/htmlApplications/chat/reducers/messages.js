@@ -80,9 +80,43 @@ export default function messagesReducer(state = initialState, action, fullState)
       //   }
       //   channels[channel].push(m);
       // });
+      const {
+        messages: oldMessages
+      } = state;
+      const newChannelIds = Object.keys(messages);
+      const oldChannelsIds = Object.keys(oldMessages);
+
+      const newMessages = {};
+      oldChannelsIds.forEach((oldChannelId) => {
+        if (newChannelIds.indexOf(oldChannelId) > -1) {
+          // If oldChannelId is not presente, it means we're no longer on channel!
+          newMessages[oldChannelId] = [];
+          const oldMessagesForChan = oldMessages[oldChannelId];
+          oldMessagesForChan.forEach((m) => newMessages[oldChannelId].push(Object.assign({}, m)));
+        }
+      });
+
+      newChannelIds.forEach((newChannelId) => {
+        if (!newMessages[newChannelId]) {
+          newMessages[newChannelId] = [];
+        }
+        const newMessagesForChan = messages[newChannelId];
+        newMessagesForChan.forEach((m) => newMessages[newChannelId].push(Object.assign({}, m)));
+      });
+
+      newChannelIds.forEach((newChannelId) => {
+        newMessages[newChannelId].sort((a, b) => {
+          const dateA = a.date;
+          const dateB = b.date;
+          if (dateA > dateB) return 1;
+          if (dateA < dateB) return -1;
+          return 0;
+        });
+      });
+
       return {
         ...state,
-        messages: { ...messages }
+        messages: newMessages
       };
     }
 
