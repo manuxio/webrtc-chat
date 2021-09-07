@@ -11,6 +11,8 @@ import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths.js';
 import checkNodeEnv from '../scripts/check-node-env';
 import deleteSourceMaps from '../scripts/delete-source-maps';
+import CopyPlugin from 'copy-webpack-plugin';
+
 
 checkNodeEnv('production');
 deleteSourceMaps();
@@ -30,7 +32,7 @@ export default merge(baseConfig, {
   target: 'electron-main',
 
   entry: {
-    main: path.join(webpackPaths.srcMainPath, 'main.js'),
+    main: ['regenerator-runtime/runtime', path.join(webpackPaths.srcMainPath, 'main.js')],
     preload: path.join(webpackPaths.srcMainPath, 'preload.js'),
   },
 
@@ -48,6 +50,12 @@ export default merge(baseConfig, {
   },
 
   plugins: [
+    new CopyPlugin({
+      patterns: [
+        { from: path.join(webpackPaths.srcMainPath, "images"), to: path.join(webpackPaths.distMainPath, "images") },
+        { from: path.join(webpackPaths.srcMainPath, "..", "public", "locales"), to: path.join(webpackPaths.distMainPath, "public", "locales") },
+      ],
+    }),
     new BundleAnalyzerPlugin({
       analyzerMode:
         process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',

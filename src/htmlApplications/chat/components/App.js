@@ -85,7 +85,7 @@ class App extends Component {
       return prev;
     }, {});
     loadMyChannels(options);
-    if (history.location.pathname === '/chat.html') {
+    if (history.location.pathname.indexOf('chat.html') > -1) {
       history.replace('/dashboard/');
     }
     // console.log('App did mount', history.location);

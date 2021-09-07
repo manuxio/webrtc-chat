@@ -18,7 +18,7 @@ export const startApplication = async (appState, runningApps, appName) => {
     }
     return;
   }
-  const urlPrefix = isDev ? 'http://localhost:1212/' : `file://${__dirname}/`;
+  const urlPrefix = isDev ? 'http://localhost:1212/' : `file://${__dirname}/../renderer/`;
   const appUrl = `${urlPrefix}${appDef.appUrl}`;
   const fnc = appDef.borderLess ? createBorderlessWindow : createWindow;
   runningApps[appName] = await fnc(appUrl, appDef.browserOptions);
@@ -34,7 +34,7 @@ export const startApplication = async (appState, runningApps, appName) => {
     });
   }
   if (appDef.trayIcon) {
-    const appTrayIcon = new Tray(`${__dirname}/../images/${appDef.trayIcon}`);
+    const appTrayIcon = new Tray(isDev ? `${__dirname}/../images/${appDef.trayIcon}` : `${__dirname}/images/${appDef.trayIcon}`);
     appTrayIcon.setTitle(appDef.trayIconTitle);
     appTrayIcon.setToolTip(appDef.trayIconDescription);
     runningApps[appName].__trayIcon = appTrayIcon;

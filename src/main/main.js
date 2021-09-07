@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 import EventEmitter from 'events';
 // import showAndAnimate from './libs/animations';
 import startApplication from './libs/startApplication';
-// import isDev from 'electron-is-dev';
+import isDev from 'electron-is-dev';
 import log from 'electron-log';
 // import preferences from './libs/preferences';
 // import createBorderlessWindow from './libs/createBorderlessWindow';
@@ -110,6 +110,17 @@ appStateEmitter.on('new-token', (newToken) => {
 new RoomsPowerMonitor(appState);
 log.info('App State', appState);
 app.whenReady()
+  .then(
+    () => {
+      if (isDev) {
+        app.setLoginItemSettings({
+          openAtLogin: true,
+          path: process.execPath,
+          name: appConfig.appName
+        });
+      }
+    }
+  )
   .then(
     () =>  { // Start tray icon
       const appTrayIcon = new Tray(`${__dirname}/images/fav.png`);

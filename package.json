@@ -1,7 +1,8 @@
 {
-  "name": "electron-react-boilerplate",
-  "productName": "ElectronReact",
-  "description": "Electron application boilerplate based on React, React Router, Webpack, React Fast Refresh for rapid application development",
+  "name": "serfinrooms",
+  "main": "./main/electron-starter.js",
+  "productName": "Serfin Rooms",
+  "description": "Serfin Rooms Client",
   "scripts": {
     "build": "concurrently \"yarn build:main\" \"yarn build:renderer\"",
     "build:main": "cross-env NODE_ENV=production webpack --config ./.erb/configs/webpack.config.main.prod.babel.js",
@@ -32,15 +33,18 @@
     ]
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "Serfin Rooms",
+    "appId": "net.cappelleri.serfin.rooms",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
-      "dist",
+      "**",
       "node_modules",
       "package.json"
     ],
+    "extraMetadata": {
+      "main": "dist/main/main.js"
+    },
     "afterSign": ".erb/scripts/notarize.js",
     "mac": {
       "type": "distribution",
@@ -65,8 +69,9 @@
     },
     "win": {
       "target": [
-        "nsis"
-      ]
+        "msi"
+      ],
+      "certificateSubjectName": "Antonino M. Cappelleri"
     },
     "linux": {
       "target": [
@@ -94,8 +99,8 @@
   },
   "author": {
     "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://electron-react-boilerplate.js.org"
+    "email": "manu@cappelleri.net",
+    "url": "https://serfin97srl.com"
   },
   "contributors": [
     {
@@ -198,6 +203,7 @@
     "browserslist-config-erb": "^0.0.1",
     "chalk": "^4.1.1",
     "concurrently": "^6.0.2",
+    "copy-webpack-plugin": "^9.0.1",
     "core-js": "^3.11.3",
     "cross-env": "^7.0.3",
     "css-loader": "^5.2.4",

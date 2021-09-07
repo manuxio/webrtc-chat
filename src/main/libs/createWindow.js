@@ -15,7 +15,7 @@ const createWindow = async (filenameOrUrl, options = {}) => {
     },
     ...options
   });
-  if (options.devTools && isDev) {
+  if (options.devTools) {
     // tmpWin.webContents.openDevTools({mode:'detach'});
     await installExtension(REACT_DEVELOPER_TOOLS)
     .then(() => installExtension(REDUX_DEVTOOLS))
