@@ -9,12 +9,13 @@ import IconButton from '@material-ui/core/IconButton';
 import TagFaces from '@material-ui/icons/TagFaces';
 import Reply from '@material-ui/icons/Reply';
 import MoreHoriz from '@material-ui/icons/MoreHoriz';
+import { format } from 'date-fns';
 
 const useStyles = makeStyles(({ palette, spacing }) => {
   const radius = spacing(2.5);
   const size = 30;
-  const rightBgColor = palette.primary.dark;
-  const leftBgColor = palette.success.dark;
+  const leftBgColor = palette.primary.dark;
+  const rightBgColor = 'rgb(101 101 101)';
   // if you want the same as facebook messenger, use this color '#09f'
   return {
     avatar: {
@@ -54,12 +55,19 @@ const useStyles = makeStyles(({ palette, spacing }) => {
       borderTopRightRadius: radius,
       borderBottomRightRadius: radius,
       backgroundColor: leftBgColor,
+      minWidth: '200px'
     },
     right: {
       borderTopLeftRadius: radius,
       borderBottomLeftRadius: radius,
       backgroundColor: rightBgColor,
+      textAlign: 'right',
       color: palette.common.white,
+      minWidth: '200px',
+      '&author': {
+        color: palette.text.disabled,
+        display: 'none'
+      }
     },
     leftFirst: {
       borderTopLeftRadius: radius,
@@ -72,6 +80,14 @@ const useStyles = makeStyles(({ palette, spacing }) => {
     },
     rightLast: {
       borderBottomRightRadius: radius,
+    },
+    author: {
+      color: palette.text.disabled
+    },
+    date: {
+      color: palette.text.disabled,
+      textAlign: 'right',
+      fontSize: '80%'
     },
     iconBtn: {
       opacity: 0,
@@ -92,7 +108,7 @@ const useStyles = makeStyles(({ palette, spacing }) => {
   };
 });
 
-const MessageBubble = ({ avatar, messages, side }) => {
+const MessageBubble = ({ from, avatar, messages, side, dates }) => {
   const styles = useStyles();
   const attachClass = index => {
     if (index === 0) {
@@ -103,6 +119,7 @@ const MessageBubble = ({ avatar, messages, side }) => {
     }
     return '';
   };
+  const name = `${from.Name} ${from.Surname}`;
   return (
     <Grid
       container
@@ -128,7 +145,13 @@ const MessageBubble = ({ avatar, messages, side }) => {
                     align={'left'}
                     className={cx(styles.msg, styles[side], attachClass(i))}
                   >
+                    {
+                      i === 0
+                      ? <div className={cx(styles.author)}>{name}</div>
+                      : null
+                    }
                     <div dangerouslySetInnerHTML={{__html: msg }} />
+                    <div className={cx(styles.date)}>{`${format(new Date(dates[i]), 'Pp')}`}</div>
                   </Typography>
                 )}
                 {typeof msg === 'object' && msg.type === 'image' && (

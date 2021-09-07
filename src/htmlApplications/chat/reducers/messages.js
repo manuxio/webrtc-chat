@@ -65,21 +65,7 @@ export default function messagesReducer(state = initialState, action, fullState)
       const {
         messages
       } = action.payload;
-      console.log('Action', action, messages);
-      // messages.sort((a, b) => {
-      //   if (a.date > b.date) return 1;
-      //   if (b.date < b.date) return -1;
-      //   return 0
-      // })
-      // .forEach((m) => {
-      //   const {
-      //     channel
-      //   } = m;
-      //   if (!channels[channel]) {
-      //     channels[channel] = [];
-      //   }
-      //   channels[channel].push(m);
-      // });
+      // console.log('Action', action, messages);
       const {
         messages: oldMessages
       } = state;
@@ -87,12 +73,16 @@ export default function messagesReducer(state = initialState, action, fullState)
       const oldChannelsIds = Object.keys(oldMessages);
 
       const newMessages = {};
+      const seenMessageIds = [];
       oldChannelsIds.forEach((oldChannelId) => {
         if (newChannelIds.indexOf(oldChannelId) > -1) {
           // If oldChannelId is not presente, it means we're no longer on channel!
           newMessages[oldChannelId] = [];
           const oldMessagesForChan = oldMessages[oldChannelId];
-          oldMessagesForChan.forEach((m) => newMessages[oldChannelId].push(Object.assign({}, m)));
+          oldMessagesForChan.forEach((m) => {
+            seenMessageIds.push(m._id);
+            newMessages[oldChannelId].push(Object.assign({}, m))
+          });
         }
       });
 
@@ -101,7 +91,7 @@ export default function messagesReducer(state = initialState, action, fullState)
           newMessages[newChannelId] = [];
         }
         const newMessagesForChan = messages[newChannelId];
-        newMessagesForChan.forEach((m) => newMessages[newChannelId].push(Object.assign({}, m)));
+        newMessagesForChan.filter((m) => seenMessageIds.indexOf(m._id.toString()) < 0).forEach((m) => newMessages[newChannelId].push(Object.assign({}, m)));
       });
 
       newChannelIds.forEach((newChannelId) => {

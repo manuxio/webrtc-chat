@@ -135,23 +135,26 @@ class ChatChannel extends Component {
       // const lastMessage = last && last.messages.length > 0 ? last.messages[0] : null;
       if (last && last.from && last.from._id === curr.from._id) {
         prev[prev.length - 1].messages.push(md.renderInline(curr.message));
+        prev[prev.length - 1].dates.push(curr.date);
       } else if (last && last.side === side) {
         prev.push({
           side,
           messages: [md.renderInline(curr.message)],
+          dates: [curr.date],
           from: curr.from
         });
       } else {
         prev.push({
           side,
           messages: [md.renderInline(curr.message)],
+          dates: [curr.date],
           from: curr.from
         });
       }
       return prev;
     }, []).map((m) => {
       return (
-        <MessageBubble key={m._id} messages={m.messages} side={m.side}/>
+        <MessageBubble key={m._id} from={m.from} dates={m.dates} messages={m.messages} side={m.side} />
       )
     });
   }
