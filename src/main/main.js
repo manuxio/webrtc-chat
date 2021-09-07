@@ -68,6 +68,19 @@ appStateEmitter.on('new-token', (newToken) => {
     console.error(e);
   });
 
+  socket.io.on("reconnect", (attempt) => {
+    console.log('Socket reconnected at attempt', attempt);
+    appState.connected = true;
+    socket.emit('user:me', (reply) => {
+      appState.user = reply.result;
+    });
+  });
+
+  socket.io.on("reconnect_attempt", (attempt) => {
+    console.log('Socket reconnect_attempt n', attempt);
+    appState.connected = false;
+  });
+
   socket.once('connect', () => {
     appState.connected = true;
     socket.emit('user:me', (reply) => {

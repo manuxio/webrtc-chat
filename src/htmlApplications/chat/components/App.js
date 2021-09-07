@@ -7,6 +7,7 @@ import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import { withRouter } from "react-router-dom";
+import { loadMyChannels } from '../actions/channels';
 
 import '../styles/App.css';
 
@@ -38,12 +39,16 @@ const mapStateToProps = (state) => {
     // login: state.login,
     // appState: state.appState,
     // user: state.appState.user,
-    connected: state.appState.connected
+    connected: state.appState.connected,
+    channels: state.channels.channels
   }
 };
 
-const mapDispatchToProps = () => {
+const mapDispatchToProps = (dispatch) => {
   return {
+    loadMyChannels: () => {
+      loadMyChannels(dispatch);
+    }
   };
 };
 
@@ -66,6 +71,14 @@ class App extends Component {
     // history.replace('/dashboard/');
     if (history.location.pathname === '/chat.html') {
       history.replace('/dashboard/');
+    } else {
+       const {
+         channels,
+         loadMyChannels
+       } = this.props;
+       if (typeof channels === 'undefined') {
+         loadMyChannels();
+       }
     }
     // console.log('App did mount', history.location);
   }

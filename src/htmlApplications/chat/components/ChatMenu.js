@@ -14,6 +14,8 @@ import ListItemButton from '@material-ui/core/ListItemButton';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import TagIcon from '@material-ui/icons/Tag';
+import AddIcon from '@material-ui/icons/Add';
+import NewChannel from './NewChannel';
 // import { Link } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 /*
@@ -125,6 +127,7 @@ class MyChatMenu extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      createChannelModalOpen: false,
       panels: {
 
       }
@@ -192,7 +195,8 @@ class MyChatMenu extends Component {
 
   render() {
     const {
-      panels
+      panels,
+      createChannelModalOpen
     } = this.state;
     const {
       t
@@ -201,6 +205,15 @@ class MyChatMenu extends Component {
       <ThemeProvider
         theme={mainTheme}
       >
+        {
+          createChannelModalOpen
+          ? <NewChannel open={createChannelModalOpen} onClose={() => {
+            this.setState({
+              createChannelModalOpen: false
+            })
+          }}/>
+          : null
+        }
       <div>
         <Accordion elevation={0} square expanded={panels.channels ? panels.channels : false} onChange={(e, expanded) => {
           this.setExpanded('channels', expanded);
@@ -218,6 +231,17 @@ class MyChatMenu extends Component {
               padding: '0px'
             }}>
             {this.generateChannelsList()}
+            <ListItemButton key="CreateChannel" onClick={() => {
+              console.log('Modal will be', !createChannelModalOpen);
+              this.setState({
+                createChannelModalOpen: !createChannelModalOpen
+              })
+            }}>
+              <ListItemIcon>
+                <AddIcon />
+              </ListItemIcon>
+              <ListItemText primary={t("Join Channel")} />
+            </ListItemButton>
           </AccordionDetails>
         </Accordion>
         <Accordion elevation={0} square expanded={panels.direct ? panels.direct : false} onChange={(e, expanded) => {
