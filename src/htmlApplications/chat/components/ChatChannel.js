@@ -21,6 +21,8 @@ import ForumOutlinedIcon from '@material-ui/icons/ForumOutlined';
 import Typography from '@material-ui/core/Typography';
 // import { diff, addedDiff, deletedDiff, updatedDiff, detailedDiff } from 'deep-object-diff';
 import { Scrollbars } from 'react-custom-scrollbars';
+import showdown from 'showdown';
+const converter = new showdown.Converter();
 // import ResizeDetector from './ResizeDetector';
 import '../styles/ChatChannel.css';
 
@@ -134,31 +136,74 @@ class ChatChannel extends Component {
       const last = prev.slice(-1).pop();
       // const lastMessage = last && last.messages.length > 0 ? last.messages[0] : null;
       if (last && last.from && last.from._id === curr.from._id) {
-        prev[prev.length - 1].messages.push(md.renderInline(curr.message));
+        prev[prev.length - 1].messages.push(converter.makeHtml(curr.message));
         prev[prev.length - 1].dates.push(curr.date);
+        prev[prev.length - 1].ids.push(curr._id);
       } else if (last && last.side === side) {
         prev.push({
           side,
-          messages: [md.renderInline(curr.message)],
+          messages: [converter.makeHtml(curr.message)],
           dates: [curr.date],
+          ids: [curr._id],
           from: curr.from
         });
       } else {
         prev.push({
           side,
-          messages: [md.renderInline(curr.message)],
+          messages: [converter.makeHtml(curr.message)],
           dates: [curr.date],
+          ids: [curr._id],
           from: curr.from
         });
       }
       return prev;
     }, []).map((m) => {
       return (
-        <MessageBubble key={m._id} from={m.from} dates={m.dates} messages={m.messages} side={m.side} />
+        <MessageBubble key={m._id} from={m.from} dates={m.dates} messages={m.messages} side={m.side} ids={m.ids} onReply={(msgid) => {
+          this.handleReply(msgid);
+        }} />
       )
     });
   }
 
+  handleReply({msgid, textversion}) {
+    const mytextversion = textversion.replaceAll('\n', ' ');
+    const {
+      messages
+    } = this.props;
+    const editor = this.editor;
+    const msg = messages.filter((msg) => msg._id === msgid)[0];
+    if (msg && editor && editor.current) {
+      console.log('MSG', msg, editor.current);
+      const contents = editor.current.editor.getContents();
+      // editor.current.editor.insertEmbed(0, 'mention', {
+      //   denotationChar: "@",
+      //   id: "1",
+      //   value: "Manuele Cappelleri"
+      // });
+      // editor.current.editor.insertText(0, `Risposta a: ${msg.from.Name} ${msg.from.Surname}\n${mytextversion.substring(0, 30)}${mytextversion.length > 30 ? '...' : ''}\n`, { blockquote: true }, true);
+      editor.current.editor.setContents([
+        {
+          insert: 'In risposta a: '
+        },
+        {
+          insert: {
+            mention: {
+              denotationChar: "@",
+              id: msg.from._id,
+              value: `${msg.from.Name} ${msg.from.Surname}`
+            }
+          }
+        },
+        { insert: '\n', attributes: { blockquote: true } },
+        {
+          insert: `${mytextversion.substring(0, 30)}${mytextversion.length > 30 ? '...' : ''}`
+        },
+        { insert: '\n', attributes: { blockquote: true } },
+        ...contents.ops
+      ]);
+    }
+  }
 
   render() {
     const {
@@ -218,7 +263,7 @@ class ChatChannel extends Component {
                 }}
                 onScrollStop={() => {
                   // console.log('Scroll stop');
-                  // console.log('Fully down?', this.scrollBars.getValues().top )
+                  console.log('Fully down?', this.scrollBars.getValues().top )
                   this.setState({
                     isFullScrolled: this.scrollBars.getValues().top === 1
                   })
@@ -243,6 +288,9 @@ class ChatChannel extends Component {
                   onSubmit={(message) => {
                     // console.log('New message', message, 'from', this.props.user);
                     return this.props.sendMessage(channel, message, this.props.user);
+                  }}
+                  passEditor={(editor) => {
+                    this.editor = editor;
                   }}
                 />
             </Box>

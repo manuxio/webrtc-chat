@@ -55,7 +55,7 @@ appStateEmitter.on('new-token', (newToken) => {
     appState.connected = false;
   }
 
-  log.debug('Connecting socket.io to:', `${appConfig.roomsApiServer}?token=${newToken}&mode=agent`);
+  log.debug('Connecting socket.io with new token');
 
   socket = io(appConfig.roomsApiServer, {
     transports: ['websocket'],
@@ -104,7 +104,7 @@ appStateEmitter.on('new-token', (newToken) => {
     });
 
   appSockets[appConfig.roomsServer] = socket;
-  console.log('appSockets added', appConfig.roomsServer);
+  log.debug('appSockets added', appConfig.roomsServer);
 });
 
 new RoomsPowerMonitor(appState);
@@ -112,7 +112,7 @@ log.info('App State', appState);
 app.whenReady()
   .then(
     () => {
-      if (isDev) {
+      if (!isDev) {
         app.setLoginItemSettings({
           openAtLogin: true,
           path: process.execPath,
@@ -135,8 +135,9 @@ app.whenReady()
       appState.primaryDisplay = {
         ...screen.getPrimaryDisplay().workAreaSize
       };
+      log.info('System information', sysInformation);
       appState.sysInformation = await sysInformation();
-      log.info('Initializing ping ipc listeners');
+      log.info('Initializing ipc listeners');
       ipcPing(app, appState, appConfig, runningApps, appSockets);
       ipcAppConfig(app, appState, appConfig, runningApps, appSockets);
       ipcAppState(app, appState, appConfig, runningApps, appSockets);

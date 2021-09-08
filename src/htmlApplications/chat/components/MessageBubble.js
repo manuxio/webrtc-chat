@@ -10,6 +10,8 @@ import TagFaces from '@material-ui/icons/TagFaces';
 import Reply from '@material-ui/icons/Reply';
 import MoreHoriz from '@material-ui/icons/MoreHoriz';
 import { format } from 'date-fns';
+import { convert } from 'html-to-text';
+
 
 const useStyles = makeStyles(({ palette, spacing }) => {
   const radius = spacing(2.5);
@@ -89,6 +91,17 @@ const useStyles = makeStyles(({ palette, spacing }) => {
       textAlign: 'right',
       fontSize: '80%'
     },
+    fromMarkdown: {
+      '& P': {
+        "margin": "0px"
+      },
+      '& blockquote': {
+        borderLeft: '2px solid #ff6a00',
+        margin: "7px 2px 7px 2px",
+        paddingLeft: "4px",
+        textAlign: "left"
+      },
+    },
     iconBtn: {
       opacity: 0,
       padding: 6,
@@ -108,7 +121,7 @@ const useStyles = makeStyles(({ palette, spacing }) => {
   };
 });
 
-const MessageBubble = ({ from, avatar, messages, side, dates }) => {
+const MessageBubble = ({ from, avatar, messages, side, dates, ids, onReply }) => {
   const styles = useStyles();
   const attachClass = index => {
     if (index === 0) {
@@ -150,17 +163,18 @@ const MessageBubble = ({ from, avatar, messages, side, dates }) => {
                       ? <div className={cx(styles.author)}>{name}</div>
                       : null
                     }
-                    <div dangerouslySetInnerHTML={{__html: msg }} />
+                    <div className={cx(styles.fromMarkdown)} dangerouslySetInnerHTML={{__html: msg }} />
                     <div className={cx(styles.date)}>{`${format(new Date(dates[i]), 'Pp')}`}</div>
                   </Typography>
                 )}
                 {typeof msg === 'object' && msg.type === 'image' && (
                   <img className={styles.image} alt={msg.alt} {...msg} />
                 )}
-                <IconButton className={styles.iconBtn}>
-                  <TagFaces />
-                </IconButton>
-                <IconButton className={styles.iconBtn}>
+                <IconButton className={styles.iconBtn} onClick={() => {
+                  if (onReply) {
+                    onReply({ msgid: ids[i], textversion: convert(msg) || ""});
+                  }
+                }}>
                   <Reply />
                 </IconButton>
                 <IconButton className={styles.iconBtn}>

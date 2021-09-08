@@ -6,10 +6,12 @@ import 'react-quill/dist/quill.snow.css';
 import "quill-mention";
 import "quill-mention/dist/quill.mention.css";
 import TurndownService from 'turndown';
+import showdown from 'showdown';
 import cheerio from 'cheerio';
 
 import '../styles/ChatEditor.css';
-
+import { NodeHtmlMarkdown } from 'node-html-markdown';
+const converter = new showdown.Converter();
 // console.log('quillEmojiMartPicker', Emoji);
 const turndownService = new TurndownService();
 Quill.register('modules/autoLinks', AutoLinks);
@@ -102,11 +104,16 @@ const modules = {
   }
 };
 
-export default function Editor({ channelName, tags, onSubmit }) {
+export default function Editor({ channelName, tags, onSubmit, passEditor }) {
   const editor = useRef(null);
   const [commentInput, setCommentInput] = useState('');
   const [, setJsonOutput] = useState({});
   const [mentionsOpen, setMentionsOpen] = useState(false);
+  useEffect(() => {
+    if (editor && passEditor) {
+      passEditor(editor);
+    }
+  });
 
   modules.mention.onOpen = () => {
     setMentionsOpen(true);
@@ -184,10 +191,10 @@ export default function Editor({ channelName, tags, onSubmit }) {
             });
             // console.log('Filtered HTML', $('body').html());
             const filteredHtml = $('body').html();
-            const markDown = turndownService.turndown(filteredHtml);
-            console.log(html);
-            console.log(filteredHtml);
-            // console.log(markDown);
+            const markDown = NodeHtmlMarkdown.translate(filteredHtml);
+            // console.log(html);
+            // console.log(filteredHtml);
+            // console.log('markDown', markDown);
             const newMessage = {
               html: filteredHtml,
               markDown,

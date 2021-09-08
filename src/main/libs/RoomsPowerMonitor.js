@@ -1,6 +1,6 @@
 import { powerMonitor } from 'electron';
 import EventEmitter from 'events';
-const IDLETIMEOUT = 10;
+const IDLETIMEOUT = 120;
 
 class RoomsPowerMonitor extends EventEmitter {
   constructor(appState) {
