@@ -265,7 +265,7 @@ class ChatChannel extends Component {
                   // console.log('Scroll stop');
                   console.log('Fully down?', this.scrollBars.getValues().top )
                   this.setState({
-                    isFullScrolled: this.scrollBars.getValues().top === 1
+                    isFullScrolled: this.scrollBars.getValues().top >= 1
                   })
                 }}
               >
