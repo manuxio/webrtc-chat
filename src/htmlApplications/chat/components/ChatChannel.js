@@ -110,7 +110,7 @@ class ChatChannel extends Component {
       this.scrollBars.scrollToBottom();
     }
     if (messages && messages.length > 0 && prevProps.messages?.length < messages.length) {
-      // console.log('Got new message', this.state);
+      console.log('Got new message, should I scroll down?', this.state.isFullScrolled);
       if (this.state.isFullScrolled) {
         this.scrollBars.scrollToBottom();
       }
