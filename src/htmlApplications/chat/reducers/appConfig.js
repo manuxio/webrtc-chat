@@ -1,4 +1,4 @@
-const initialState = {};
+export const initialState = {};
 
 export default function appConfigReducer(state = initialState, action) {
   switch (action.type) {

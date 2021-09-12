@@ -7,7 +7,7 @@ const combineReducersWithFullState = (reducers) => {
       var _key = finalReducerKeys[_i];
       var reducer = reducers[_key];
       var previousStateForKey = state[_key];
-      var nextStateForKey = reducer(previousStateForKey, action, state);
+      var nextStateForKey = reducer(previousStateForKey, action, state, nextState);
 
       if (typeof nextStateForKey === 'undefined') {
         var actionType = action && action.type;

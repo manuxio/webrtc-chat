@@ -2,7 +2,7 @@ import {
   APPSTATE_CHANGED
 } from '../actiontypes/appState';
 
-const initialState = {};
+export const initialState = {};
 
 export default function appStateReducer(state = initialState, action) {
   // console.log('In Reducer', action);

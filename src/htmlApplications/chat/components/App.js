@@ -9,6 +9,7 @@ import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import { withRouter } from "react-router-dom";
 import { loadMyChannels } from '../actions/channels';
 import { getLastMessageDateByChannels } from './selectors/chatMessages';
+import MessagesObserver from './MessagesObserver';
 // import log from 'electron-log';
 
 import '../styles/App.css';
@@ -72,7 +73,7 @@ class App extends Component {
     // console.log('App History', history);
     // console.log('Navigating to /dashboard/');
     // history.replace('/dashboard/');
-    console.log('App remounted?');
+    // console.log('App remounted?');
     const {
       lastMessagesByChannel,
       loadMyChannels
@@ -93,14 +94,14 @@ class App extends Component {
 
   componentDidUpdate(prevProps) {
     // console.log('App Reconnect?', this.props.connected && this.props.connected !== prevProps.connected);
+    const {
+      lastMessagesByChannel,
+      loadMyChannels
+    } = this.props;
     if (this.props.connected && this.props.connected !== prevProps.connected) {
       // console.log('Closing in 1 second');
       // closeMe(1000);
-      const {
-        lastMessagesByChannel,
-        loadMyChannels
-      } = this.props;
-      // console.log('[TODO] Update channels and messages!!!', lastMessagesByChannel);
+
       const options = Object.keys(lastMessagesByChannel).reduce((prev, curr) => {
         prev[curr] = {
           date: { $gt: lastMessagesByChannel[curr] }
@@ -114,6 +115,7 @@ class App extends Component {
   render() {
     return (
       <>
+        <MessagesObserver />
         <ThemeProvider
           theme={mainTheme}
         >

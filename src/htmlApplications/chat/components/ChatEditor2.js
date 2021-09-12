@@ -5,15 +5,15 @@ import { useEffect, useRef, useState, React } from 'react';
 import 'react-quill/dist/quill.snow.css';
 import "quill-mention";
 import "quill-mention/dist/quill.mention.css";
-import TurndownService from 'turndown';
-import showdown from 'showdown';
+// import TurndownService from 'turndown';
+// import showdown from 'showdown';
 import cheerio from 'cheerio';
 
 import '../styles/ChatEditor.css';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
-const converter = new showdown.Converter();
+// const converter = new showdown.Converter();
 // console.log('quillEmojiMartPicker', Emoji);
-const turndownService = new TurndownService();
+// const turndownService = new TurndownService();
 Quill.register('modules/autoLinks', AutoLinks);
 
 // import { Emoji, EmojiBlot } from '../../../extra/quill-emoji-mart-picker';
@@ -165,7 +165,7 @@ export default function Editor({ channelName, tags, onSubmit, passEditor }) {
             code
           } = e;
           // console.log(code, shiftKey, ctrlKey, mentionsOpen);
-          if (code === 'Enter' && !shiftKey && !ctrlKey && !mentionsOpen) {
+          if ((code === 'Enter' || code === 'NumpadEnter') && !shiftKey && !ctrlKey && !mentionsOpen) {
             const html = editor.current.getEditor().root.innerHTML;
             const $ = cheerio.load(html);
             const mentions = [];
@@ -205,17 +205,17 @@ export default function Editor({ channelName, tags, onSubmit, passEditor }) {
               handleChange('\n');
               // editor.current.getEditor().enable(false);
               onSubmit(newMessage)
-                .then(
-                  (result) => {
-                    console.log('Message sent in editor', result);
-                  }
-                )
-                .then(
-                  () => {
+                // .then(
+                //   (result) => {
+                //     console.log('Message sent in editor', result);
+                //   }
+                // )
+                // .then(
+                //   () => {
 
-                    // editor.current.getEditor().enable(true);
-                  }
-                )
+                //     // editor.current.getEditor().enable(true);
+                //   }
+                // )
             } else {
               handleChange('\n');
               // editor.current.getEditor().enable(true);

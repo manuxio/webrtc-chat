@@ -4,7 +4,6 @@ import { withTranslation } from 'react-i18next';
 import { Route } from 'react-router-dom';
 
 // import AppSkeleton from './AppSkeleton';
-// import withEvents from '../libs/withEvents';
 // import Backdrop from '@material-ui/core/Backdrop';
 // import CircularProgress from '@material-ui/core/CircularProgress';
 // import { createTheme, ThemeProvider } from '@material-ui/core/styles';

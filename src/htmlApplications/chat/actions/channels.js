@@ -2,7 +2,8 @@ import { doInvoke } from './ipcRequest';
 
 import {
   CHANNELS_UPDATE,
-  CHANNELS_SET_VISIBLE
+  CHANNELS_SET_VISIBLE,
+  CHANNELS_SET_LASTSEEN
 } from '../actiontypes/channels.js';
 
 import {
@@ -39,6 +40,22 @@ export const setVisible = (dispatch) => {
   }
 }
 
+export const setLastSeen = (dispatch) => (...args) => {
+  // log.info('Setting last seen for channel via ipc', ...args);
+  const [channel, lastseen] = args;
+  dispatch(channelSetLastSeen(channel._id, lastseen));
+  doInvoke('channels:setlastseen:request', channel._id, lastseen)(dispatch).then(
+    (result) => {
+      log.info('Got setlastseen reply in a promise', result);
+    }
+  )
+  .catch(
+    (e) => {
+      log.error(e);
+    }
+  )
+}
+
 export const setBulkMessages = (dispatch) => {
   return (messages) => {
     dispatch(loadBulkMessages(messages));
@@ -56,6 +73,14 @@ const channelSetVisible = (channelId, visible) => ({
   payload: {
     channelId,
     visible
+  }
+});
+
+const channelSetLastSeen = (channelId, lastSeen) => ({
+  type: CHANNELS_SET_LASTSEEN,
+  payload: {
+    channelId,
+    lastSeen
   }
 });
 

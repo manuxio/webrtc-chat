@@ -20,11 +20,11 @@ i18n
   // init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
-    ns: ['sampleapp'],
+    ns: ['login'],
     fallbackLng: 'it',
     debug: true,
     backend: {
-      loadPath: `${__dirname}/../main/public/locales/{{lng}}/{{ns}}.json`,
+      loadPath: process.env.NODE_ENV === 'development' ? `/locales/{{lng}}/{{ns}}.json` : `${__dirname}/../main/public/locales/{{lng}}/{{ns}}.json`,
     },
     react: {
       // useSuspense: false

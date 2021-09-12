@@ -6,7 +6,7 @@ import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
-import TagFaces from '@material-ui/icons/TagFaces';
+// import TagFaces from '@material-ui/icons/TagFaces';
 import Reply from '@material-ui/icons/Reply';
 import MoreHoriz from '@material-ui/icons/MoreHoriz';
 import { format } from 'date-fns';

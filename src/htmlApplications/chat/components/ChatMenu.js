@@ -1,7 +1,7 @@
 import React, { Component, Suspense } from 'react';
 import { connect } from 'react-redux';
+import Badge from '@material-ui/core/Badge';
 import { withTranslation } from 'react-i18next';
-// import withEvents from '../libs/withEvents';
 import { withRouter } from "react-router";
 import Accordion from '@material-ui/core/Accordion';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
@@ -111,6 +111,7 @@ const mapStateToProps = (state) => {
     // appState: state.appState,
     // user: state.appState.user,
     // connected: state.appState.connected,
+    alerts: state.alerts,
     channels: state.channels.channels
   }
 };
@@ -157,7 +158,8 @@ class MyChatMenu extends Component {
     const {
       channels,
       history,
-      location
+      location,
+      alerts
     } = this.props;
 
     if (!channels) {
@@ -168,6 +170,7 @@ class MyChatMenu extends Component {
       return null;
     }
     const subElements = myChannels.map((c) => {
+      const chanAlert = alerts && alerts.byChannel ? alerts.byChannel[c._id] : {};
       return (
         <ListItemButton key={c._id} onClick={() => {
             // console.log('location', location);
@@ -176,7 +179,7 @@ class MyChatMenu extends Component {
             }
         }}>
           <ListItemIcon>
-            <TagIcon />
+            <Badge badgeContent={chanAlert.unseenMessages || null} color={chanAlert.unseenMentions > 0 ? 'secondary' : 'primary'}><TagIcon /></Badge>
           </ListItemIcon>
           <ListItemText primary={c.name} />
         </ListItemButton>

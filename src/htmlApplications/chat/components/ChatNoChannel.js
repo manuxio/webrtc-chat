@@ -1,7 +1,6 @@
 import React, { Component, Suspense } from 'react';
 import { connect } from 'react-redux';
 import { withTranslation } from 'react-i18next';
-import withEvents from '../libs/withEvents';
 import { withRouter } from "react-router";
 import Box from '@material-ui/core/Box';
 // import Button from '@material-ui/core/Button';
@@ -73,7 +72,7 @@ class ChatNoChannel extends Component {
   }
 }
 
-const MyComponent = connect(mapStateToProps, mapDispatchToProps)(withTranslation('chat')(withEvents(withRouter(ChatNoChannel))));
+const MyComponent = connect(mapStateToProps, mapDispatchToProps)(withTranslation('chat')(withRouter(ChatNoChannel)));
 export default function App() {
   return (
     <Suspense fallback="loading">

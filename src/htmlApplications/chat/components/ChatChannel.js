@@ -1,10 +1,10 @@
 import React, { Component, Suspense } from 'react';
 // import Promise from 'bluebird';
 import { connect } from 'react-redux';
-import MarkdownIt from 'markdown-it';
+// import MarkdownIt from 'markdown-it';
+import log from 'electron-log';
 
 // import { withTranslation } from 'react-i18next';
-// import withEvents from '../libs/withEvents';
 // import withMatchedParams from '../libs/withMatchedParams';
 // import { withRouter } from "react-router";
 import Box from '@material-ui/core/Box';
@@ -15,20 +15,20 @@ import ChatEditor from './ChatEditor2';
 import { getMessages, getChannel, getMe } from './selectors/chatChannel';
 import MessageBubble from './MessageBubble';
 import { doInvoke } from '../actions/ipcRequest';
-import { setVisible } from '../actions/channels';
+import { setVisible, setLastSeen } from '../actions/channels';
 import { loadBulkMessagesByChannelId, sendMessageAction } from '../actions/messages';
 import ForumOutlinedIcon from '@material-ui/icons/ForumOutlined';
 import Typography from '@material-ui/core/Typography';
 // import { diff, addedDiff, deletedDiff, updatedDiff, detailedDiff } from 'deep-object-diff';
-import { Scrollbars } from 'react-custom-scrollbars';
+import { Scrollbars } from 'react-custom-scrollbars-2';
 import showdown from 'showdown';
 const converter = new showdown.Converter();
 // import ResizeDetector from './ResizeDetector';
 import '../styles/ChatChannel.css';
 
-const md = new MarkdownIt({
-  breaks: true
-});
+// const md = new MarkdownIt({
+//   breaks: true
+// });
 
 const mapStateToProps = (state, props, getState) => {
   // console.log('Original Props', props);
@@ -37,7 +37,8 @@ const mapStateToProps = (state, props, getState) => {
     // connected: state.appState.connected,
     user: getMe(state, props, getState),
     channel: getChannel(state, props),
-    messages: getMessages(state, props)
+    messages: getMessages(state, props),
+    isAppFocused: state.appState.focusedApps.indexOf('chat') > -1
   }
 };
 
@@ -50,10 +51,16 @@ const mapDispatchToProps = (dispatch) => {
       return loadBulkMessagesByChannelId(dispatch, args);
     },
     sendMessage: (...args) => {
+      const [channel, message] = args;
+      setLastSeen(dispatch)(channel, message.date);
       return sendMessageAction(dispatch)(...args);
     },
     setChannelVisible: (...args) => {
       return setVisible(dispatch)(...args);
+    },
+    setChannelLastSeen: (...args) => {
+      const fnc = setLastSeen(dispatch);
+      return fnc(...args);
     }
   };
 };
@@ -75,17 +82,19 @@ class ChatChannel extends Component {
       loadBulkMessagesByChannelId,
       setChannelVisible
     } = this.props;
-    const {
-      isVisible
-    } = channel;
+    // const {
+    //   isVisible
+    // } = channel;
+    if (!messages) {
+      return;
+    }
     if (messages.length === 0) {
       loadBulkMessagesByChannelId({ _id: channel._id });
     } else {
       this.scrollBars.scrollToBottom();
     }
-    if (!isVisible) {
-      setChannelVisible(channel._id);
-    }
+    this.updateLastSeenIfNeeded();
+    setChannelVisible(channel._id);
   }
 
   componentWillUnmount() {
@@ -97,25 +106,58 @@ class ChatChannel extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    // console.log('ChatChannel Did Update');
-    // console.log('DIFF', diff(this.props, prevProps)); // =>
     const {
-      messages
+      channel,
+      setChannelVisible,
+      messages,
     } = this.props;
-    if (messages && messages.length > 0 && (
-      !prevProps.messages
-      || prevProps.messages.length === 0
-    )) {
-      // console.log('Something changed!');
+
+    const isSameChannel = prevProps.channel._id === this.props.channel._id;
+    const gotNewMessage = isSameChannel && (messages && messages.length > 0 && prevProps.messages?.length < messages.length);
+    if (!isSameChannel) {
+      log.silly('Scrolling, because channel is different');
       this.scrollBars.scrollToBottom();
-    }
-    if (messages && messages.length > 0 && prevProps.messages?.length < messages.length) {
-      console.log('Got new message, should I scroll down?', this.state.isFullScrolled);
-      if (this.state.isFullScrolled) {
+    } else {
+      if (gotNewMessage && this.state.isFullScrolled) {
+        log.silly('Scrolling, because got at least one new message');
         this.scrollBars.scrollToBottom();
       }
     }
+
+    if (!isSameChannel) {
+      log.silly('Setting new channel as visible');
+      setChannelVisible(channel._id);
+    }
+    this.updateLastSeenIfNeeded();
+
     // console.log('Not scrolling', this.scrollBars.getScrollTop());
+  }
+
+  updateLastSeenIfNeeded() {
+
+    const { messages, channel, setChannelLastSeen, isAppFocused} = this.props;
+    if (!isAppFocused) {
+      log.log('Chat is not focused!');
+      return;
+    }
+    log.log('Chat is focused');
+    const lastMessage = messages && messages.length > 0 ? messages[messages.length - 1] : {};
+    log.log('[CHAT CHANNEL] lastMessage', lastMessage);
+    if (lastMessage) {
+      const {
+        lastSeen
+      } = channel;
+      const {
+        date: messageDate
+      } = lastMessage;
+      log.log('[CHAT CHANNEL] Compating', lastSeen, messageDate, lastSeen < messageDate);
+      if (!lastSeen || lastSeen < messageDate) {
+        log.log('[CHAT CHANNEL] Must update last seen for channel', channel.name, 'lastSeen', lastSeen, 'messageDate', messageDate);
+        setChannelLastSeen(channel, messageDate);
+      } else {
+        log.log('[CHAT CHANNEL] No need to update lastSeen for channel', channel.name, 'lastSeen', lastSeen, 'messageDate', messageDate);
+      }
+    }
   }
 
   makeBubbles() {
@@ -123,7 +165,7 @@ class ChatChannel extends Component {
       messages,
       user
     } = this.props;
-    if (!user) {
+    if (!user || !messages) {
       return null;
     }
     return messages.reduce((prev, curr) => {
@@ -140,6 +182,7 @@ class ChatChannel extends Component {
         prev[prev.length - 1].dates.push(curr.date);
         prev[prev.length - 1].ids.push(curr._id);
       } else if (last && last.side === side) {
+        // converter.makeHtml(curr.message)
         prev.push({
           side,
           messages: [converter.makeHtml(curr.message)],
@@ -263,10 +306,17 @@ class ChatChannel extends Component {
                 }}
                 onScrollStop={() => {
                   // console.log('Scroll stop');
-                  console.log('Fully down?', this.scrollBars.getValues().top )
-                  this.setState({
-                    isFullScrolled: this.scrollBars.getValues().top >= 1
-                  })
+                  // console.log('Fully down?', this.scrollBars.getValues().top )
+                  const {
+                    isFullScrolled: oldIsFullyScrolled
+                  } = this.state;
+                  const isFullScrolled = this.scrollBars.getValues().top >= 0.98 || this.scrollBars.getValues().scrollHeight === this.scrollBars.getValues().clientHeight;
+                  // console.log('Scroll Values', this.scrollBars.getValues());
+                  if (oldIsFullyScrolled != isFullScrolled) {
+                    this.setState({
+                      isFullScrolled
+                    });
+                  }
                 }}
               >
                 {this.makeBubbles()}

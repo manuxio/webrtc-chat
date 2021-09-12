@@ -1,9 +1,10 @@
 import {
   CHANNELS_UPDATE,
-  CHANNELS_SET_VISIBLE
+  CHANNELS_SET_VISIBLE,
+  CHANNELS_SET_LASTSEEN
 } from '../actiontypes/channels';
 
-const initialState = {
+export const initialState = {
   channels: undefined
 };
 
@@ -24,6 +25,24 @@ export default function channelsReducer (state = initialState, action) {
           return {
             ...c,
             isVisible: visible && c._id === channelId
+          }
+        })
+      };
+    }
+    case CHANNELS_SET_LASTSEEN: {
+      const {
+        channelId,
+        lastSeen
+      } = action.payload;
+      const {
+        channels
+      } = state;
+      return {
+        ...state,
+        channels: channels.map((c) => {
+          return {
+            ...c,
+            lastSeen: c._id === channelId ? lastSeen : c.lastSeen
           }
         })
       };

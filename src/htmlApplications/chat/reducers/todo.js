@@ -4,7 +4,7 @@ import {
   ADD_TODO_STARTED
 } from '../actiontypes/todo';
 
-const initialState = {
+export const initialState = {
   loading: false,
   todos: [],
   error: null

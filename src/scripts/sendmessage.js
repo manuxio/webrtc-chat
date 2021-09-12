@@ -15,11 +15,17 @@ const { argv } = yargs
     describe: "The message",
     demandOption: "Message is required",
     type: "string",
+  })
+  .option("t", {
+    alias: "tag",
+    describe: "Tag a user",
+    type: "string",
   });
 
 const {
   channel,
-  message
+  message,
+  tag
 } = argv;
 
 
@@ -57,16 +63,21 @@ const start = async () => {
   });
   socket.once('connect', () => {
     console.log('Connected!');
-    const tag = 'messages:sendto:request';
+    const mytag = 'messages:sendto:request';
     socket.emit('user:me', ({ result: from }) => {
       const newMessage = {
         channel,
         message,
-        mentions: [],
+        mentions: tag ? [
+          {
+            "_id" : tag.split(':')[0],
+            "name" : tag.split(':')[1],
+          }
+        ] : [],
         from,
         date: (new Date()).toISOString()
       };
-      socket.emit(tag, newMessage, (reply) => {
+      socket.emit(mytag, newMessage, (reply) => {
         console.log('Got reply', reply);
         process.exit();
       });

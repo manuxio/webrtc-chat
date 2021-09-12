@@ -5,8 +5,11 @@ import appDefinitions from '../appstarters';
 import createBorderlessWindow from './createBorderlessWindow';
 import createWindow from './createWindow';
 import showAndAnimate from './animations';
-
+const focusedApps = new Set();
 export const startApplication = async (appState, runningApps, appName) => {
+  if (!appState.focusedApps) {
+    appState.focusedApps = [...focusedApps];
+  }
   log.info(`Starting ${appName} app.`);
   const appDef = appDefinitions[appName];
   if (runningApps[appName]) {
@@ -54,6 +57,16 @@ export const startApplication = async (appState, runningApps, appName) => {
       }
     });
   }
+
+  runningApps[appName].on('focus', () => {
+    focusedApps.add(appName);
+    appState.focusedApps = [...focusedApps];
+  });
+  runningApps[appName].on('blur', () => {
+    focusedApps.delete(appName);
+    appState.focusedApps = [...focusedApps];
+  });
+
 
   runningApps[appName].once('closed', () => {
     log.info(`App ${appName} closed.`);

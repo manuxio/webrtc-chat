@@ -1,10 +1,9 @@
 import React, { Component, Suspense } from 'react';
 import { connect } from 'react-redux';
 import { withTranslation } from 'react-i18next';
-// import withEvents from '../libs/withEvents';
 import Box from '@material-ui/core/Box';
 import CssBaseline from '@material-ui/core/CssBaseline';
-// import Badge from '@material-ui/core/Badge';
+import Badge from '@material-ui/core/Badge';
 
 
 import ForumOutlinedIcon from '@material-ui/icons/ForumOutlined';
@@ -16,7 +15,6 @@ import Chat from './Chat';
 import { withRouter } from "react-router";
 import { NavLink, Route } from 'react-router-dom';
 import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined';
-
 // import { styled, ThemeProvider, createTheme } from '@material-ui/core/styles';
 
 
@@ -27,7 +25,8 @@ const mapStateToProps = (state) => {
     login: state.login,
     appState: state.appState,
     user: state.appState.user,
-    connected: state.appState.connected
+    connected: state.appState.connected,
+    alerts: state.alerts
   }
 };
 
@@ -77,7 +76,8 @@ class AppSkeleton extends Component {
   render() {
     const {
       match,
-      location
+      location,
+      alerts
     } = this.props;
     // console.log('Match', match);
     // console.log('Location', location);
@@ -110,7 +110,9 @@ class AppSkeleton extends Component {
               <MyNavLink to="/dashboard/" match={match} location={location}>
                 <DashboardOutlinedIcon />
               </MyNavLink>
-              <MyNavLink to="/chat/" match={match} location={location} icon={<ForumOutlinedIcon />} />
+              <MyNavLink to="/chat/" match={match} location={location}>
+                <Badge badgeContent={alerts.unseenMessages || null} color={alerts.unseenMentions > 0 ? 'secondary' : 'primary'}><ForumOutlinedIcon /></Badge>
+              </MyNavLink>
               <MyNavLink to="/todos/" match={match} location={location} icon={<PlaylistAddCheckOutlinedIcon />} />
             </Stack>
           </Box>

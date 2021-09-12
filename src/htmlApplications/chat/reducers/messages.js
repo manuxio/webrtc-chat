@@ -11,7 +11,7 @@ import {
 } from '../actiontypes/messages.js';
 
 
-const initialState = {
+export const initialState = {
   messages: {},
 };
 
@@ -120,7 +120,7 @@ export default function messagesReducer(state = initialState, action, fullState)
       } = newMessage;
       if (!messages[channel]) { messages[channel] = []}
       // messages[channel] = [...messages[channel], newMessage];
-      console.log('messages', messages);
+      // console.log('messages', messages);
       return {
         ...state,
         messages: {
@@ -131,7 +131,6 @@ export default function messagesReducer(state = initialState, action, fullState)
     }
 
     case MESSAGES_UPDATEONE: {
-      console.log('IN MESSAGES_UPDATEONE', action);
       const newMessageProps = action.payload.data;
       const oldMessageId = action.payload.oldMessageId;
       const channelId = action.payload.channelId;

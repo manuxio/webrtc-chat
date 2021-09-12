@@ -34,6 +34,7 @@ export const doInvoke = (...originalArgs) => {
       )
       .then(
         (response) => {
+          console.log('IPC RESPONSE', response);
           if (response && response.error) {
             throw new Error(response.error);
           }

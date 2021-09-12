@@ -6,7 +6,7 @@ import {
 
 const log = require('electron-log');
 
-const initialState = {
+export const initialState = {
   ipcRequests: {}
 };
 
@@ -27,7 +27,7 @@ export default function pingReducers(state = initialState, action) {
       const {
         ipcRequests
       } = state;
-      const { [requestId]: toRemove, ...remainder } = ipcRequests;
+      const { [requestId]: toRemove, ...remainder } = ipcRequests; // eslint-disable-line
       log.info(`Removing succeeded ipcRequest ${requestId}`, action);
 
       return {

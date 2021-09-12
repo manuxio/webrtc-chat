@@ -11,8 +11,18 @@ import login from './reducers/login';
 import ipcRequests from './reducers/ipcRequests';
 import channels from './reducers/channels';
 import messages from './reducers/messages';
+import alerts from './reducers/alerts';
 
 // Use ES6 object literal shorthand syntax to define the object shape
+
+const makeDummyReducer = (defState) => (state) => {
+  let nState = state;
+  if (typeof state === 'undefined') {
+    nState = defState;
+  }
+  return nState;
+}
+
 const mainReducers = combineReducers({
   todo,
   ping,
@@ -20,13 +30,20 @@ const mainReducers = combineReducers({
   appState,
   login,
   ipcRequests,
-  messages: (state = { messages: {}}) => state,
-  channels: (state = { channels: undefined }) => state
+  messages: makeDummyReducer({ messages: {}}),
+  channels: makeDummyReducer({ channels: undefined }),
+  alerts: makeDummyReducer({})
 });
 
 const specialReducers = combineReducersWithFullState({
+  todo: makeDummyReducer(),
+  ping: makeDummyReducer(),
+  appConfig: makeDummyReducer(),
+  appState: makeDummyReducer(),
+  login: makeDummyReducer(),
   channels,
-  messages
+  messages,
+  alerts
 });
 
 const rootReducer = (state, action) => {

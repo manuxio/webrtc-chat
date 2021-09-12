@@ -1,0 +1,1 @@
+export const APPALERTS_CHANGE = 'APPALERTS_CHANGE';

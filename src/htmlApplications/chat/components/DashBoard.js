@@ -2,7 +2,6 @@ import React, { Component, Suspense } from 'react';
 import { connect } from 'react-redux';
 import { withTranslation } from 'react-i18next';
 // import AppSkeleton from './AppSkeleton';
-import withEvents from '../libs/withEvents';
 // import Backdrop from '@material-ui/core/Backdrop';
 // import CircularProgress from '@material-ui/core/CircularProgress';
 // import { createTheme } from '@material-ui/core/styles';
@@ -114,7 +113,7 @@ class DashBoard extends Component {
   }
 }
 
-const MyComponent = connect(mapStateToProps, mapDispatchToProps)(withTranslation('chat')(withEvents(withRouter(DashBoard))));
+const MyComponent = connect(mapStateToProps, mapDispatchToProps)(withTranslation('chat')(withRouter(DashBoard)));
 export default function App() {
   return (
     <Suspense fallback="loading">

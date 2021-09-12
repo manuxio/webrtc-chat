@@ -9,21 +9,49 @@ const getAllMessages = (state) => {
   return state.messages.messages;
 };
 
-const getAllChannels = (state) => {
+// const getAllMessagesAsString = (state) => {
+//   // console.log('MMMM', state.messages);
+//   return JSON.stringify(state.messages.messages);
+// };
+
+// const getAllChannels = (state) => {
+//   // console.log('getAllChannels state', state);
+//   return JSON.stringify(state.channels.channels);
+// };
+
+const getAllChannelsWithoutPropsAsString = (props = []) => (state) => {
   // console.log('getAllChannels state', state);
-  return state.channels.channels;
+  if (!state.channels.channels) return;
+  const channels = JSON.stringify(state.channels.channels.map((c) => {
+    const o = JSON.parse(JSON.stringify(c));
+    props.forEach((p) => {
+      delete o[p];
+    });
+    return o;
+  }));
+  return channels;
 };
 
 const getUser = (state) => {
   return state.appState.user;
 };
 
-export const getMessages = createSelector(
+export const getMessagesAsString = createSelector(
   [ getChannelId, getAllMessages ],
   (channelId, messagesByChannel) => {
     // console.log('Executing out getMessages function');
     // console.log('EXXXX', messagesByChannel);
-    return messagesByChannel[channelId];
+    return JSON.stringify(messagesByChannel[channelId]);
+    // return messages.filter((m) => m.channel === channelId);
+  }
+);
+
+export const getMessages = createSelector(
+  [ getMessagesAsString ],
+  (messages = "[]" ) => {
+    // console.log('Executing out getMessages function');
+    // console.log('EXXXX', typeof messages, messages);
+    return JSON.parse(messages);
     // return messages.filter((m) => m.channel === channelId);
   }
 );
@@ -36,10 +64,10 @@ export const getMe = createSelector(
 );
 
 export const getChannel = createSelector(
-  [ getChannelId, getAllChannels ],
-  (channelId, channels) => {
-    // console.log('Executing out getChannel function');
-    return channels.reduce((prev, curr) => {
+  [ getChannelId, getAllChannelsWithoutPropsAsString(['isVisible']) ],
+  (channelId, channels = "[]") => {
+    // console.log('Executing out getChannel function', channels);
+    return JSON.parse(channels).reduce((prev, curr) => {
       if (curr._id === channelId) return curr;
       return prev;
     }, null);

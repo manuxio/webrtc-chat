@@ -3,7 +3,7 @@ import {
   PING_STARTED
 } from '../actiontypes/ping';
 
-const initialState = {
+export const initialState = {
   date: null,
   payload: null
 };

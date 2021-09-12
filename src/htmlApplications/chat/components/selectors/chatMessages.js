@@ -15,7 +15,7 @@ const getMyLastMessageDateByChannels = (state) => {
       return prev;
     }, null);
   })
-  return result;
+  return JSON.stringify(result);
 };
 
 const getUser = (state) => {
@@ -31,7 +31,7 @@ export const getLastMessageDateByChannels = createSelector(
   (retval) => {
     // console.log('Executing out getMessages function');
     // console.log('EXXXX', messagesByChannel);
-    return retval;
+    return JSON.parse(retval);
     // return messages.filter((m) => m.channel === channelId);
   }
 );

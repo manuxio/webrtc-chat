@@ -4,7 +4,7 @@ import {
   LOGIN_FAILURE
 } from '../actiontypes/login';
 
-const initialState = {
+export const initialState = {
   loggingIn: false,
   loggedIn: false,
   loginError: null

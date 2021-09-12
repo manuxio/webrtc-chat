@@ -4,6 +4,7 @@ import { ipcRenderer } from 'electron';
 import { connect } from 'react-redux';
 import { newState } from '../actions/appState';
 import { genericAction } from '../actions/genericAction';
+import { withRouter } from "react-router";
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -11,10 +12,12 @@ const mapDispatchToProps = dispatch => {
       dispatch(newState(data));
     },
     genericAction: (...args) => {
+      console.log('genericAction', dispatch);
       return genericAction(dispatch)(...args);
     }
   };
 };
+
 
 const withEvents = (WrappedComponent) => {
   // ...and returns another component...
@@ -23,10 +26,11 @@ const withEvents = (WrappedComponent) => {
     constructor(props) {
       super(props);
       this.eventsToListen = [
-        'messages:new'
+        'messages:new',
       ];
       this.boundGenericListeners = {};
       this.boundAppStateChangeListener = this.appStateChangeListener.bind(this);
+      this.boundRemoteLocationListener = this.remoteLocationChangeListener.bind(this);
       this.eventsToListen.forEach((eventName) => {
         this.boundGenericListeners[eventName] = this.genericListener(eventName);
       });
@@ -34,14 +38,18 @@ const withEvents = (WrappedComponent) => {
 
     componentDidMount() {
       ipcRenderer.on('appState:changed', this.boundAppStateChangeListener);
+      ipcRenderer.on('remotelocation:change', this.boundRemoteLocationListener);
       this.eventsToListen.forEach((eventName) => {
+        console.log('Listening to', eventName);
         ipcRenderer.on(eventName, this.boundGenericListeners[eventName]);
       });
     }
 
     componentWillUnmount() {
       ipcRenderer.off('appState:changed', this.boundAppStateChangeListener);
+      ipcRenderer.off('remotelocation:change', this.boundRemoteLocationListener);
       this.eventsToListen.forEach((eventName) => {
+        console.log('No longer listening to', eventName);
         ipcRenderer.off(eventName, this.boundGenericListeners[eventName]);
       });
     }
@@ -56,6 +64,12 @@ const withEvents = (WrappedComponent) => {
       this.props.newStateDispatch(data);
     }
 
+    remoteLocationChangeListener(event, data) {
+      // this.props.newStateDispatch(data);
+      console.log('Remote Location Change', data.url);
+      this.props.history.push(data.url);
+    }
+
     render() {
       return <WrappedComponent {...this.props} />;
     }
@@ -65,7 +79,7 @@ const withEvents = (WrappedComponent) => {
     newStateDispatch: PropTypes.func
   }
   WithEvents.displayName = `withEvents(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
-  return connect(null, mapDispatchToProps)(WithEvents);
+  return connect(null, mapDispatchToProps)(withRouter(WithEvents));
 }
 
 export default withEvents;
