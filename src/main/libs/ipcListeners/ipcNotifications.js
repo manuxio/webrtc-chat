@@ -1,6 +1,6 @@
 const { Notification, ipcMain } = require('electron');
 import log from 'electron-log';
-import uuid from 'uuid';
+import { v4 } from 'uuid';
 import Promise from 'bluebird';
 // import { getMessages, getChannel, getMe } from './selectors/chatChannel';
 
@@ -46,7 +46,8 @@ export default (app, appState, appConfig, runningApps) => {
         silent: false,
         sound: null,
         onClick: null,
-        uid: uuid.v1()
+        uid: v4(),
+        timeoutType: 'never'
       }, customOptions);
       onCancel(() => {
         log.log('Notification has been cancelled!', options.uid);
@@ -81,6 +82,26 @@ export default (app, appState, appConfig, runningApps) => {
       notifications[uid] = notification;
       notification.on('show', () => {
         log.log('Notification open', uid);
+	setTimeout(() => {
+		if (notification && notifications[uid]) {
+			notification.close();
+			log.log('Notification closed by timeout', uid);
+        notificationsOnScreen--;
+        delete notifications[uid];
+        const pendingNotificationIds = Object.keys(notifications);
+        // log.log('Pending notification ids', pendingNotificationIds);
+        log.log(`${pendingNotificationIds.length} notifications pending`);
+        if (pendingNotificationIds.length > 0) {
+          notifications[pendingNotificationIds[0]].show();
+          delete notifications[pendingNotificationIds[0]];
+          return resolve({
+            error: false,
+            result: true
+          });
+        }
+
+		}
+	}, 10000);
         notificationsOnScreen++;
       });
       notification.on('close', () => {

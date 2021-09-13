@@ -1,8 +1,0 @@
-{
-  "version": 1,
-  "mode": "dev",
-  "roomsServer": "http://localhost:8080",
-  "roomsApiServer": "http://localhost:8081",
-  "appName": "Rooms Agent",
-  "appDescription": "Realtime CRM"
-}

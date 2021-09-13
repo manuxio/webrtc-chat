@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import log from 'electron-log';
 import Promise from 'bluebird';
 import { doInvoke } from '../actions/ipcRequest';
-import uuid from 'uuid';
+import { v4 } from 'uuid';
 // import { getMessages, getChannel, getMe } from './selectors/chatChannel';
 
 Promise.config({
@@ -131,7 +131,7 @@ class MessagesObserver extends Component {
 
   createPromise(msg, channel, delay, sendFunction, cancelFunction) {
     const p = new Promise((resolve, reject, onCancel) => {
-      const myuid = uuid.v4();
+      const myuid = v4();
       let remotePromise;
       let localPromise;
       onCancel(function () {

@@ -339,8 +339,16 @@ class ChatChannel extends Component {
                 <ChatEditor
                   tags={[
                     {
-                      id: 1,
+                      id: "5ec3cf8695105bbd41dcfe64",
                       value: 'Manuele Cappelleri'
+                    },
+                    {
+                      id: "5ee74f6595105bbd41890ee8",
+                      value: 'Luca Lupidi'
+                    },
+                    {
+                      id: "5f96e7c397df6a36ffda4641",
+                      value: 'Massimo Sorbino'
                     }
                   ]}
                   channelName={channel.name}
