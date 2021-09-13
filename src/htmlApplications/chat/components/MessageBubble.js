@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
@@ -11,9 +11,10 @@ import Reply from '@material-ui/icons/Reply';
 import MoreHoriz from '@material-ui/icons/MoreHoriz';
 import { format } from 'date-fns';
 import { convert } from 'html-to-text';
+// import Promise from 'bluebird';
 
 
-const useStyles = makeStyles(({ palette, spacing }) => {
+const useStyles = makeStyles(({ palette, spacing/*, measure */ }) => {
   const radius = spacing(2.5);
   const size = 30;
   const leftBgColor = palette.primary.dark;
@@ -200,4 +201,10 @@ MessageBubble.defaultProps = {
   side: 'left',
 };
 
-export default MessageBubble;
+export default function SuspendedMessageBubble(props) {
+  return (
+    <Suspense fallback="Please wait">
+      <MessageBubble {...props} />
+    </Suspense>
+  );
+}

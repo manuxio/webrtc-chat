@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 // import MarkdownIt from 'markdown-it';
 import log from 'electron-log';
 
-// import { withTranslation } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 // import withMatchedParams from '../libs/withMatchedParams';
 // import { withRouter } from "react-router";
 import Box from '@material-ui/core/Box';
@@ -14,10 +14,14 @@ import ChatEditor from './ChatEditor2';
 // import ForumOutlinedIcon from '@material-ui/icons/ForumOutlined';
 import { getMessages, getChannel, getMe } from './selectors/chatChannel';
 import MessageBubble from './MessageBubble';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import IconButton from '@material-ui/core/IconButton';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { doInvoke } from '../actions/ipcRequest';
 import { setVisible, setLastSeen } from '../actions/channels';
 import { loadBulkMessagesByChannelId, sendMessageAction } from '../actions/messages';
-import ForumOutlinedIcon from '@material-ui/icons/ForumOutlined';
+// import ForumOutlinedIcon from '@material-ui/icons/ForumOutlined';
 import Typography from '@material-ui/core/Typography';
 // import { diff, addedDiff, deletedDiff, updatedDiff, detailedDiff } from 'deep-object-diff';
 import { Scrollbars } from 'react-custom-scrollbars-2';
@@ -137,12 +141,12 @@ class ChatChannel extends Component {
 
     const { messages, channel, setChannelLastSeen, isAppFocused} = this.props;
     if (!isAppFocused) {
-      log.log('Chat is not focused!');
+      // log.log('Chat is not focused!');
       return;
     }
-    log.log('Chat is focused');
+    // log.log('Chat is focused');
     const lastMessage = messages && messages.length > 0 ? messages[messages.length - 1] : {};
-    log.log('[CHAT CHANNEL] lastMessage', lastMessage);
+    // log.log('[CHAT CHANNEL] lastMessage', lastMessage);
     if (lastMessage) {
       const {
         lastSeen
@@ -150,12 +154,12 @@ class ChatChannel extends Component {
       const {
         date: messageDate
       } = lastMessage;
-      log.log('[CHAT CHANNEL] Compating', lastSeen, messageDate, lastSeen < messageDate);
+      // log.log('[CHAT CHANNEL] Comparing', lastSeen, messageDate, lastSeen < messageDate);
       if (!lastSeen || lastSeen < messageDate) {
-        log.log('[CHAT CHANNEL] Must update last seen for channel', channel.name, 'lastSeen', lastSeen, 'messageDate', messageDate);
+        // log.log('[CHAT CHANNEL] Must update last seen for channel', channel.name, 'lastSeen', lastSeen, 'messageDate', messageDate);
         setChannelLastSeen(channel, messageDate);
       } else {
-        log.log('[CHAT CHANNEL] No need to update lastSeen for channel', channel.name, 'lastSeen', lastSeen, 'messageDate', messageDate);
+        // log.log('[CHAT CHANNEL] No need to update lastSeen for channel', channel.name, 'lastSeen', lastSeen, 'messageDate', messageDate);
       }
     }
   }
@@ -251,12 +255,14 @@ class ChatChannel extends Component {
   render() {
     const {
       channel,
+      messages,
+      t
       // messages
     } = this.props;
     // console.log('Messages', this.props);
     return (
       <>
-        <Box p={1} height="100vh" style={{ overflowY: "auto" }}>
+        <Box p={0} height="100vh" style={{ overflowY: "auto" }}>
           <div
             style={{
               display: 'flex',
@@ -268,31 +274,34 @@ class ChatChannel extends Component {
               height: '100%'
             }}
           >
+            <AppBar position="static">
+              <Toolbar variant="dense">
+                <Typography
+                  variant="h6"
+                  noWrap
+                  component="div"
+                  sx={{ flexGrow: 1 }}
+                >
+                  #{channel.name} - {messages.length} {t('messages')}
+                </Typography>
+                <div>
+                  <IconButton
+                    size="small"
+                    color="inherit"
+                  >
+                    <InfoOutlinedIcon />
+                  </IconButton>
+                </div>
+              </Toolbar>
+            </AppBar>
             <div style={{
+              padding: '10px',
               order: 0,
               flex: "1 1 auto",
               paddingBottom: '5px',
               height: `calc(100% - ${this.state.editorHeight}px)`,
             }}>
-              <Box
-                sx={{
-                  position: 'fixed',
-                  opacity: .15,
-                  height: `calc(100%)`,
-                  width: 'calc(100vw - 80px - 250px - 16px)',
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  fontSize: '300px',
-                  zIndex: -1
-                }}
-                >
-                <ForumOutlinedIcon fontSize={"inherit"} color={'disabled'} />
-                <Typography variant="h5" gutterBottom component="div" sx={{ color: 'text.disabled'}}>
-                  #{channel.name}
-                </Typography>
-              </Box>
+
               <Scrollbars
                 ref={(c) => { this.scrollBars = c; }}
                 // This will activate auto hide
@@ -351,7 +360,7 @@ class ChatChannel extends Component {
   }
 }
 
-const MyComponent = connect(mapStateToProps, mapDispatchToProps)(ChatChannel);
+const MyComponent = connect(mapStateToProps, mapDispatchToProps)(withTranslation('chat')(ChatChannel));
 // export default MyComponent;
 // MyComponent.whyDidYouRender = true;
 // MyComponent.prototype.whyDidYouRender = true;

@@ -1,4 +1,4 @@
-import log from 'electron-log';
+// import log from 'electron-log';
 // import { parse } from 'path';
 // import {
 //   APPALERTS_CHANGE
@@ -110,7 +110,7 @@ export default function alertsReducer (state = initialState, action, prevState, 
     case CHANNELS_SET_LASTSEEN:
     case CHANNELS_SET_VISIBLE:  {
     // case MESSAGES_NEW:
-      const start = new Date();
+      // const start = new Date();
       // log.log('[ALERTS REDUCER] Start', start.getTime());
       // log.log('[ALERTS REDUCER] Recalculating after', action.type, action.payload);
       // log.log('********** RECALCULATE ***********', action.type, fullState);
@@ -157,9 +157,9 @@ export default function alertsReducer (state = initialState, action, prevState, 
           };
         }
       });
-      const end = new Date();
-      const diff = end - start;
-      log.log('End', end.getTime(), diff);
+      // const end = new Date();
+      // const diff = end - start;
+      // log.log('End', end.getTime(), diff);
       // log.log('[ALERTS REDUCER] Final Object', JSON.stringify({
       //   unseenMessages,
       //   unseenMentions,

@@ -1,4 +1,4 @@
-const { MongoClient, Server, ObjectId } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const fs = require('fs');
 const readline = require('readline');
 const uri =  "mongodb://10.161.9.215:27017/roomsChat?serverSelectionTimeoutMS=5000&connectTimeoutMS=10000";
@@ -8,7 +8,7 @@ const client2 = new MongoClient(uri2);
 
 const data = fs.readFileSync('./chatlines.txt').toString();
 const totalLines = data.split('\n').length;
-const channelId = new ObjectId('612778827782b80e77413cb2');
+const channelId = new ObjectId('613a720fcf2aed183a2c74e3');
 
 const startDate = new Date(Date.parse('01 Jan 2021 00:12:00 GMT'));
 const endDate = new Date();
@@ -46,11 +46,17 @@ async function processLineByLine() {
     const now = new Date(startDate.getTime() + (cnt++ * dateAvg));
     console.log(now);
     console.log(`Line from file: ${line}`);
-    console.log(client);
+    // console.log(client);
     try {
+      const randomFrom = users[Math.floor(Math.random()*users.length)];
+      const randomMention = users[Math.floor(Math.random()*users.length)];
       await client.db().collection('messages').insertOne({
         message: line,
-        from: users[Math.floor(Math.random()*users.length)],
+        from: randomFrom,
+        mentions: Math.random() > .5 ? [{
+          _id: randomMention._id,
+          value: `${randomMention.Name} ${randomMention.Surname}`
+        }]: [],
         channel: channelId,
         date: now,
       });
