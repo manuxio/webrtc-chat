@@ -15,6 +15,7 @@ import Stack from '@material-ui/core/Stack';
 import ChatMenu from './ChatMenu';
 import ChatNoChannel from './ChatNoChannel';
 import ChatChannel from './ChatChannel';
+import GroupCreator from './GroupCreator';
 // import { NavLink, Route } from 'react-router-dom';
 
 import '../styles/App.css';
@@ -90,7 +91,8 @@ class Chat extends Component {
             height: '100vh',
             backgroundColor: '#1e272c',
             paddingTop: '0px',
-            borderRight: '1px solid #333f44'
+            borderRight: '1px solid #333f44',
+            overflow: 'auto'
           }}
         >
           <ChatMenu/>
@@ -108,7 +110,11 @@ class Chat extends Component {
           <Route exact path="/chat/">
             <ChatNoChannel />
           </Route>
-          <Route path="/chat/:channel" render={(routeProps) => {
+          <Route exact path="/chat/createchannel" render={() => {
+              return (
+                <GroupCreator />);
+          }} />
+          <Route exact path="/chat/channel/:channel" render={(routeProps) => {
               return (
                 <ChatChannel channelId={routeProps.match.params.channel} />);
           }} />

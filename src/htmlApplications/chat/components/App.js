@@ -8,6 +8,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import { withRouter } from "react-router-dom";
 import { loadMyChannels } from '../actions/channels';
+import { loadUsers } from '../actions/users';
 import { getLastMessageDateByChannels } from './selectors/chatMessages';
 import MessagesObserver from './MessagesObserver';
 // import log from 'electron-log';
@@ -52,6 +53,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     loadMyChannels: (...args) => {
       loadMyChannels(dispatch)(...args);
+    },
+    loadUsers: (...args) => {
+      loadUsers(dispatch)(...args)
     }
   };
 };
@@ -76,7 +80,8 @@ class App extends Component {
     // console.log('App remounted?');
     const {
       lastMessagesByChannel,
-      loadMyChannels
+      loadMyChannels,
+      loadUsers
     } = this.props;
     // console.log('[TODO] Update channels and messages!!!', lastMessagesByChannel);
     const options = Object.keys(lastMessagesByChannel).reduce((prev, curr) => {
@@ -86,6 +91,7 @@ class App extends Component {
       return prev;
     }, {});
     loadMyChannels(options);
+    loadUsers();
     if (history.location.pathname.indexOf('chat.html') > -1) {
       history.replace('/dashboard/');
     }
@@ -96,7 +102,8 @@ class App extends Component {
     // console.log('App Reconnect?', this.props.connected && this.props.connected !== prevProps.connected);
     const {
       lastMessagesByChannel,
-      loadMyChannels
+      loadMyChannels,
+      loadUsers
     } = this.props;
     if (this.props.connected && this.props.connected !== prevProps.connected) {
       // console.log('Closing in 1 second');
@@ -109,6 +116,7 @@ class App extends Component {
         return prev;
       }, {});
       loadMyChannels(options);
+      loadUsers();
     }
   }
 

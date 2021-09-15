@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect';
 
-const getChannelId = (state, props) => {
+const getChannelId = (state, props, propName) => {
+  if (propName) return props[propName];
   return props.channelId;
 }
 
@@ -23,6 +24,32 @@ const getAllChannelsWithoutPropsAsString = (props = []) => (state) => {
   // console.log('getAllChannels state', state);
   if (!state.channels.channels) return;
   const channels = JSON.stringify(state.channels.channels.map((c) => {
+    const o = JSON.parse(JSON.stringify(c));
+    props.forEach((p) => {
+      delete o[p];
+    });
+    return o;
+  }));
+  return channels;
+};
+
+const getAllGroupChannelsWithoutPropsAsString = (props = []) => (state) => {
+  // console.log('getAllChannels state', state);
+  if (!state.channels.channels) return;
+  const channels = JSON.stringify(state.channels.channels.filter(c => c.type === 'group').map((c) => {
+    const o = JSON.parse(JSON.stringify(c));
+    props.forEach((p) => {
+      delete o[p];
+    });
+    return o;
+  }));
+  return channels;
+};
+
+const getAllUserChannelsWithoutPropsAsString = (props = []) => (state) => {
+  // console.log('getAllChannels state', state);
+  if (!state.channels.channels) return;
+  const channels = JSON.stringify(state.channels.channels.filter(c => c.type === 'direct').map((c) => {
     const o = JSON.parse(JSON.stringify(c));
     props.forEach((p) => {
       delete o[p];
@@ -73,3 +100,27 @@ export const getChannel = createSelector(
     }, null);
   }
 );
+
+export const getUserChannels = createSelector(
+  [getAllUserChannelsWithoutPropsAsString(['isVisible', 'stateChange', 'lastChange', 'lastSeen'])],
+  (channels = []) => {
+    return JSON.parse(channels);
+  }
+);
+
+export const getGroupChannels = createSelector(
+  [getAllGroupChannelsWithoutPropsAsString(['isVisible', 'stateChange', 'lastChange', 'lastSeen'])],
+  (channels = []) => {
+    return JSON.parse(channels);
+  }
+)
+
+/*
+stateChange(pin):"2021-08-26T11:18:26.752Z"
+lastMessageDate(pin):null
+lastMessage(pin):null
+participants(pin):
+lastSeen(pin):"2021-09-13T09:58:20.146Z"
+unseenMessages(pin):0
+unseenMentionedMessages(pin):0
+*/

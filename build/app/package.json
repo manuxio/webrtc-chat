@@ -2,7 +2,7 @@
   "name": "serfin-rooms",
   "productName": "Serfin Rooms",
   "version": "1.0.1",
-  "description": "Serfin Corporate Rooms Cliente",
+  "description": "Serfin Corporate Rooms Client",
   "main": "./dist/main/main.js",
   "author": {
     "name": "Antonino Emanuele Cappelleri",

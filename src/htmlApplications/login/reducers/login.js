@@ -10,7 +10,7 @@ const initialState = {
   loginError: null
 };
 
-export default function pingReducers(state = initialState, action) {
+export default function loginReducer(state = initialState, action) {
   switch (action.type) {
     case LOGIN_STARTED: {
       return {

@@ -3,6 +3,7 @@ logs
 *.log
 
 config/config.*.dev.json
+publish.json
 
 # Runtime data
 pids

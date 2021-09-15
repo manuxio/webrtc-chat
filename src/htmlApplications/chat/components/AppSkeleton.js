@@ -41,7 +41,7 @@ const FancyLink = (props) => {
         borderRadius: '50%',
         marginBottom: '5px',
         border: '0px'
-    }} selected={props.active} color="secondary" aria-label="delete" size="large">
+    }} selected={props.active} color="secondary" aria-label="delete" size="large" value={props.to}>
       {props.icon}
     </ToggleButton>
   );
@@ -57,7 +57,7 @@ const MyNavLink = (props) => {
   const isActive = location.pathname.includes(to);
   return (
     <NavLink to={to}>
-      <FancyLink active={isActive} icon={props.icon || props.children} />
+      <FancyLink active={isActive} icon={props.icon || props.children} to={to} />
     </NavLink>
   )
 }

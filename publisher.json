@@ -1,0 +1,17 @@
+{
+  "transport": {
+    "module": "ssh",
+    "host": "gestionale.s97.local",
+    "username": "web4all",
+    "password": "Nocetta$x",
+    "remotePath": "/home/web4all/webserfin/serfin/rooms",
+    "remoteUrl": "http://gestionale.s97.local/rooms"
+  },
+  "fields": {
+    "readme": "Serfin Rooms Corporate Client"
+  },
+  "metaFileUrl": "http://gestionale.s97.local/rooms/update.json",
+  "except": [
+    "dev"
+  ]
+}

@@ -23,6 +23,7 @@ import sysInformation from './libs/sysInformation';
 import appStateObserver from './libs/observers/appState';
 import socketListeners from './libs/socketlisteners';
 import ipcNotifications from './libs/ipcListeners/ipcNotifications';
+import ipcProxy from './libs/ipcListeners/proxy';
 // import playAudio from './libs/playAudio';
 
 let socket;
@@ -140,6 +141,7 @@ app.whenReady()
       ipcChannels(app, appState, appConfig, runningApps, appSockets);
       ipcMessages(app, appState, appConfig, runningApps, appSockets);
       ipcNotifications(app, appState, appConfig, runningApps, appSockets);
+      ipcProxy(app, appState, appConfig, runningApps, appSockets);
       log.info('App is ready!');
 
       const apps = Object.keys(appstarters);
