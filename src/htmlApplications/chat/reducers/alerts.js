@@ -95,7 +95,7 @@ export default function alertsReducer (state = initialState, action, prevState, 
       chanDetails.lastMessage = msg;
       copyOfState.unseenMessages++;
       copyOfState.lastMessage = msg;
-      if (hasMention) {
+      if (hasMention || channel.type === 'direct') {
         chanDetails.unseenMentions++;
         copyOfState.unseenMentions++;
         chanDetails.unseenMentioningMessages = chanDetails.unseenMentioningMessages.slice().concat([msg]);

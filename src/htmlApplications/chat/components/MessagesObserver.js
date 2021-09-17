@@ -159,7 +159,7 @@ class MessagesObserver extends Component {
         .then(
           () => {
             remotePromise = sendFunction({
-              title: `${msg.from.Name} ti ha nominato sul canale ${channel.name}`,
+              title: channel.name ? `${msg.from.Name} ti ha nominato sul canale ${channel.name}` : `Nuovo messaggio privato da ${msg.from.Name}`,
               body: msg.message,
               whenFocused: 'audio',
               sound: 'chime.mp3',
