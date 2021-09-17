@@ -12,7 +12,7 @@ const mapDispatchToProps = dispatch => {
       dispatch(newState(data));
     },
     genericAction: (...args) => {
-      console.log('genericAction', dispatch);
+      // console.log('genericAction', dispatch);
       return genericAction(dispatch)(...args);
     }
   };
@@ -27,6 +27,8 @@ const withEvents = (WrappedComponent) => {
       super(props);
       this.eventsToListen = [
         'messages:new',
+        'channels:newchannel',
+        'channel:setvideosession'
       ];
       this.boundGenericListeners = {};
       this.boundAppStateChangeListener = this.appStateChangeListener.bind(this);

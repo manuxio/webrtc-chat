@@ -7,7 +7,8 @@
 import {
   CHANNELS_SET_LASTSEEN,
   CHANNELS_UPDATE,
-  CHANNELS_SET_VISIBLE
+  CHANNELS_SET_VISIBLE,
+  CHANNELS_ADD
 } from '../actiontypes/channels';
 
 import {
@@ -172,6 +173,22 @@ export default function alertsReducer (state = initialState, action, prevState, 
         unseenMentioningMessages,
         byChannel
       };
+    }
+
+    case CHANNELS_ADD: {
+      const channel = action.payload.channel;
+      return {
+        ...state,
+        byChannel: {
+          ...state.byChannel,
+          [channel._id]: {
+            unseenMessages: 0,
+            unseenMentions: 0,
+            lastMessage: null,
+            unseenMentioningMessages: []
+          }
+        }
+      }
     }
     default:
       return state;

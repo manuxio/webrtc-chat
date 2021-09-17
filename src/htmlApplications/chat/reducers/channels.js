@@ -1,7 +1,10 @@
 import {
   CHANNELS_UPDATE,
   CHANNELS_SET_VISIBLE,
-  CHANNELS_SET_LASTSEEN
+  CHANNELS_SET_LASTSEEN,
+  CHANNELS_ADD,
+  CHANNELS_REMOTE_ADD,
+  CHANNELS_SET_VIDEO_SESSION
 } from '../actiontypes/channels';
 
 export const initialState = {
@@ -59,6 +62,60 @@ export default function channelsReducer (state = initialState, action) {
           unseenMessages: 0,
           unseenMentionedMessages: 0
         })),
+        updateTime: new Date().getTime()
+      };
+    }
+    case CHANNELS_ADD: {
+      const {
+        channel
+      } = action.payload;
+
+      return {
+        ...state,
+        channels: state.channels.concat([{
+          ...channel,
+          unseenMessages: 0,
+          unseenMentionedMessages: 0
+        }]),
+        updateTime: new Date().getTime()
+      };
+    }
+
+    case CHANNELS_SET_VIDEO_SESSION: {
+      const {
+        channel: channelId,
+        session: sessionId
+      } = action.payload;
+      console.log('Reducer', CHANNELS_SET_VIDEO_SESSION, action.payload);
+
+      return {
+        ...state,
+        channels: state.channels.map((c) => {
+          if (c._id !== channelId) return {
+            ...c
+          };
+          return {
+            ...c,
+            videoSessionId: sessionId
+          }
+        }),
+        updateTime: new Date().getTime()
+      };
+    }
+
+    case CHANNELS_REMOTE_ADD: {
+      const {
+        channel
+      } = action.payload;
+
+      return {
+        ...state,
+        channels: state.channels.concat([{
+          ...channel,
+          remotelyCreated: true,
+          unseenMessages: 0,
+          unseenMentionedMessages: 0
+        }]),
         updateTime: new Date().getTime()
       };
     }

@@ -93,7 +93,7 @@ export const getMe = createSelector(
 export const getChannel = createSelector(
   [ getChannelId, getAllChannelsWithoutPropsAsString(['isVisible']) ],
   (channelId, channels = "[]") => {
-    // console.log('Executing out getChannel function', channels);
+    console.log('Executing out getChannel function', channels, JSON.parse(channels));
     return JSON.parse(channels).reduce((prev, curr) => {
       if (curr._id === channelId) return curr;
       return prev;
@@ -102,14 +102,14 @@ export const getChannel = createSelector(
 );
 
 export const getUserChannels = createSelector(
-  [getAllUserChannelsWithoutPropsAsString(['isVisible', 'stateChange', 'lastChange', 'lastSeen'])],
+  [getAllUserChannelsWithoutPropsAsString(['stateChange', 'lastChange', 'lastSeen'])],
   (channels = []) => {
     return JSON.parse(channels);
   }
 );
 
 export const getGroupChannels = createSelector(
-  [getAllGroupChannelsWithoutPropsAsString(['isVisible', 'stateChange', 'lastChange', 'lastSeen'])],
+  [getAllGroupChannelsWithoutPropsAsString(['stateChange', 'lastChange', 'lastSeen'])],
   (channels = []) => {
     return JSON.parse(channels);
   }

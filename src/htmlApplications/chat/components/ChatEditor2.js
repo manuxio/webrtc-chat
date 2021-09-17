@@ -18,6 +18,7 @@ Quill.register('modules/autoLinks', AutoLinks);
 
 // import { Emoji, EmojiBlot } from '../../../extra/quill-emoji-mart-picker';
 import { emojis } from '../../../extra/quill-emoji-mart-picker';
+import '../styles/mentions.css';
 
 // Quill.register(
 //     {
@@ -156,7 +157,7 @@ export default function Editor({ channelName, tags, onSubmit, passEditor }) {
         formats={formats}
         value={commentInput}
         ref={editor}
-        placeholder={`Post to ${channelName}`}
+        placeholder={`Write something...`}
         onKeyDown={(e) => {
           // console.log(args);
           const {

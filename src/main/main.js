@@ -88,7 +88,7 @@ appStateEmitter.on('new-token', (newToken) => {
   Object.keys(socketListeners)
     .map((k) => socketListeners[k])
     .reduce((prev, curr) => {
-      Object.keys(curr).map((k) => {
+      Object.keys(curr).forEach((k) => {
         prev.push(curr[k]);
       });
       return prev;

@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import ReactQuill from "react-quill";
 import "quill-mention";
 import "quill-mention/dist/quill.mention.css";
+import '../styles/mentions.css';
 // import "quill-emoji";
 // import "quill-emoji/dist/quill-emoji.css";
 

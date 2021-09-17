@@ -3,43 +3,39 @@
 // } from '../actiontypes/channels';
 
 // import messages from 'main/libs/socketlisteners/messages.js';
+import { CHANNELS_ADD, CHANNELS_REMOTE_ADD } from '../actiontypes/channels.js';
 import {
   MESSAGES_BULK_LOAD,
   MESSAGES_NEW,
   MESSAGES_UPDATEONE,
-  MESSAGES_NEW_REMOTE
+  MESSAGES_NEW_REMOTE,
 } from '../actiontypes/messages.js';
-
 
 export const initialState = {
   messages: {},
 };
 
-export default function messagesReducer(state = initialState, action, fullState) {
+export default function messagesReducer(
+  state = initialState,
+  action,
+  fullState,
+) {
   // console.log('In Reducer', action);
   switch (action.type) {
     case MESSAGES_NEW_REMOTE: {
-      const {
-        channels: channelsContainer
-      } = fullState;
+      const { channels: channelsContainer } = fullState;
       if (!channelsContainer) {
         return state;
       }
-      const {
-        messages
-      } = state;
-      const {
-        channels
-      } = channelsContainer;
+      const { messages } = state;
+      const { channels } = channelsContainer;
       // console.log('GOT ACTION', action);
       // console.log('HAD STATE', state);
       // console.log('HAD FULL STATE', fullstate);
       if (!channels || channels.length === 0) {
         return state;
       }
-      const {
-        channel
-      } = action.payload;
+      const { channel } = action.payload;
       const channelKnown = channels.reduce((prev, curr) => {
         if (prev) return prev;
         if (curr._id === channel) return true;
@@ -53,8 +49,8 @@ export default function messagesReducer(state = initialState, action, fullState)
         ...state,
         messages: {
           ...messages,
-          [channel]: state.messages[channel].concat([newMessage])
-        }
+          [channel]: state.messages[channel].concat([newMessage]),
+        },
       };
     }
 
@@ -62,13 +58,9 @@ export default function messagesReducer(state = initialState, action, fullState)
       // const {
       //   channels
       // } = state;
-      const {
-        messages
-      } = action.payload;
+      const { messages } = action.payload;
       // console.log('Action', action, messages);
-      const {
-        messages: oldMessages
-      } = state;
+      const { messages: oldMessages } = state;
       const newChannelIds = Object.keys(messages);
       const oldChannelsIds = Object.keys(oldMessages);
 
@@ -81,7 +73,7 @@ export default function messagesReducer(state = initialState, action, fullState)
           const oldMessagesForChan = oldMessages[oldChannelId];
           oldMessagesForChan.forEach((m) => {
             seenMessageIds.push(m._id);
-            newMessages[oldChannelId].push(Object.assign({}, m))
+            newMessages[oldChannelId].push(Object.assign({}, m));
           });
         }
       });
@@ -91,7 +83,9 @@ export default function messagesReducer(state = initialState, action, fullState)
           newMessages[newChannelId] = [];
         }
         const newMessagesForChan = messages[newChannelId];
-        newMessagesForChan.filter((m) => seenMessageIds.indexOf(m._id.toString()) < 0).forEach((m) => newMessages[newChannelId].push(Object.assign({}, m)));
+        newMessagesForChan
+          .filter((m) => seenMessageIds.indexOf(m._id.toString()) < 0)
+          .forEach((m) => newMessages[newChannelId].push(Object.assign({}, m)));
       });
 
       newChannelIds.forEach((newChannelId) => {
@@ -106,27 +100,25 @@ export default function messagesReducer(state = initialState, action, fullState)
 
       return {
         ...state,
-        messages: newMessages
+        messages: newMessages,
       };
     }
 
     case MESSAGES_NEW: {
       const newMessage = action.payload.message;
-      const {
-        messages
-      } = state;
-      const {
-        channel
-      } = newMessage;
-      if (!messages[channel]) { messages[channel] = []}
+      const { messages } = state;
+      const { channel } = newMessage;
+      if (!messages[channel]) {
+        messages[channel] = [];
+      }
       // messages[channel] = [...messages[channel], newMessage];
       // console.log('messages', messages);
       return {
         ...state,
         messages: {
           ...messages,
-          [channel]: messages[channel].concat([newMessage])
-        }
+          [channel]: messages[channel].concat([newMessage]),
+        },
       };
     }
 
@@ -134,10 +126,7 @@ export default function messagesReducer(state = initialState, action, fullState)
       const newMessageProps = action.payload.data;
       const oldMessageId = action.payload.oldMessageId;
       const channelId = action.payload.channelId;
-      const {
-        messages
-      } = state;
-      console.log('messages[channel]', channelId, messages, messages[channelId]);
+      const { messages } = state;
       return {
         ...state,
         messages: {
@@ -149,21 +138,25 @@ export default function messagesReducer(state = initialState, action, fullState)
             }
             const newO = Object.assign({}, m, newMessageProps);
             return newO;
-          })
-        }
+          }),
+        },
       };
     }
-    // case CHANNELS_UPDATE: {
-    //   const {
-    //     channels
-    //   } = action.payload;
-    //
-    //   return {
-    //     ...state,
-    //     channels,
-    //     updateTime: new Date().getTime()
-    //   };
-    // }
+
+    case CHANNELS_REMOTE_ADD:
+    case CHANNELS_ADD: {
+      console.log('ACTION', action);
+      const channel = action.payload.channel;
+      const { messages } = state;
+      return {
+        ...state,
+        messages: {
+          ...messages,
+          [channel._id]: [],
+        },
+      };
+    }
+
     default:
       return state;
   }
