@@ -206,6 +206,7 @@ class VideoChat extends Component {
   subscribeToStreamCreated() {
     const { videoSession, subscribers, localUser } = this.state;
     videoSession.on('streamCreated', (event) => {
+      console.log('[OPENVIDU] Stream Created!', event);
       const subscriber = videoSession.subscribe(event.stream, undefined);
       // var subscribers = this.state.subscribers;
       subscriber.on('streamPlaying', (e) => {
@@ -316,7 +317,7 @@ class VideoChat extends Component {
           transition: height .5s;
         }
       `;
-    console.log('Local User', localUser);
+    console.log('Local User', localUser, this.state.subscribers);
     return (
       <>
         {videoChat?.videoSessionToken ? <GlobalStyleOn /> : <GlobalStyleOff />}
@@ -340,7 +341,14 @@ class VideoChat extends Component {
                   alignItems="flex-start"
                   spacing={0}
                 >
-                  <div style={{ flexGrow: 1 }}>Ciao</div>
+                  <div style={{ flexGrow: 1 }}>
+                  {this.state.subscribers.map((sub, i) => (
+                      <div key={i} className="OT_root OT_publisher custom-class" id="remoteUsers">
+                          <StreamComponent user={sub} streamId={sub.streamManager.stream.streamId} />
+                      </div>
+                  ))}
+
+                  </div>
                   {localUser !== undefined && localUser.getStreamManager() && (
                     <div
                       className="OT_root OT_publisher custom-class"

@@ -30,14 +30,29 @@ export default class OvVideoComponent extends Component {
 
     render() {
       console.log('OV VIDEO', this.props);
+      const {
+        nickname
+      } = this.props;
         return (
-            <video
+          <>
+          <div style={{ position: "relative" }}>
+          <video
                 style={{ height: '120px' }}
                 autoPlay={true}
                 id={'video-' + this.props.user.getStreamManager().stream.streamId}
                 ref={this.videoRef}
                 muted={this.props.mutedSound}
-            />
+            >
+
+              </video>
+              {
+                nickname
+                ? <div className="videonickname">{nickname}</div>
+                : null
+              }
+</div>
+</>
+
         );
     }
 }

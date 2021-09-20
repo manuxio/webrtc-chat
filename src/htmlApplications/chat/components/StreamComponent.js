@@ -57,6 +57,7 @@ export default class StreamComponent extends Component {
 
   render() {
     console.log('Local User in stream component', this.props.user);
+    const { user } = this.props;
     return (
       <div className="OT_widget-container">
         {this.props.user !== undefined &&
@@ -66,6 +67,7 @@ export default class StreamComponent extends Component {
             <OvVideoComponent
               user={this.props.user}
               mutedSound={this.state.mutedSound}
+              nickname={ user.type === 'remote' ? user.nickname : null }
             />
             <div id="statusIcons">
               {!this.props.user.isVideoActive() ? (
