@@ -385,7 +385,7 @@ class MyChatMenu extends Component {
             <CircularProgress color="inherit" />
           </Backdrop>
         ) : null}
-        <div style={{ height: '100vh' }}>
+        <div className={"maximumHeight"}>
           <Scrollbars
             // This will activate auto hide
             autoHide

@@ -21,40 +21,60 @@ import ipcMessages from './libs/ipcListeners/ipcMessages';
 import appConfig from './libs/config.js';
 import sysInformation from './libs/sysInformation';
 import appStateObserver from './libs/observers/appState';
+import appSettingsObserver from './libs/observers/appSettings';
+
 import socketListeners from './libs/socketlisteners';
 import ipcNotifications from './libs/ipcListeners/ipcNotifications';
 import ipcProxy from './libs/ipcListeners/proxy';
+import createHiddenWindow from './libs/createHiddenBrowser';
+import promiseWhile from './libs/promiseWhile';
+import Promise from 'bluebird';
+import ProxyAgent from 'proxy-agent';
+
 // import playAudio from './libs/playAudio';
 
 let socket;
 const runningApps = {};
 
 const appStateEmitter = new EventEmitter();
+const appSettingsEmitter = new EventEmitter();
 
-const appState = new Proxy({
-  authenticated: false,
-  connected: false,
-  jwtToken: null,
-  user: null,
-  sysInformation: null,
-  focusedApps: []
-}, appStateObserver(app, runningApps, appStateEmitter));
+const appState = new Proxy(
+  {
+    authenticated: false,
+    connected: false,
+    jwtToken: null,
+    user: null,
+    sysInformation: null,
+    focusedApps: [],
+  },
+  appStateObserver(app, runningApps, appStateEmitter),
+);
+
+const appSettings = new Proxy(
+  {},
+  appSettingsObserver(app, runningApps, appSettingsEmitter),
+);
 
 const appSockets = {};
 
 appStateEmitter.on('new-token', (newToken) => {
-
   if (socket) {
     socket.disconnect();
     appState.connected = false;
   }
 
   log.debug('Connecting socket.io with new token');
-
-  socket = io(appConfig.roomsApiServer, {
+  let agent;
+  if (appConfig.proxyHost) {
+    agent = new ProxyAgent(`http://${appConfig.proxyHost}:${appConfig.proxyPort}`);
+    log.debug('Socket connecting via proxy', `http://${appConfig.proxyHost}:${appConfig.proxyPort}`)
+  }
+  socket = io(appConfig.roomsServer, {
     transports: ['websocket'],
-    'query': 'token=' + newToken + '&mode=agent',
-    reconnection: true
+    query: 'token=' + newToken + '&mode=agent',
+    reconnection: true,
+    agent
   });
 
   socket.on('error', (e) => {
@@ -62,7 +82,7 @@ appStateEmitter.on('new-token', (newToken) => {
     console.error(e);
   });
 
-  socket.io.on("reconnect", (attempt) => {
+  socket.io.on('reconnect', (attempt) => {
     console.log('Socket reconnected at attempt', attempt);
     appState.connected = true;
     socket.emit('user:me', (reply) => {
@@ -70,7 +90,7 @@ appStateEmitter.on('new-token', (newToken) => {
     });
   });
 
-  socket.io.on("reconnect_attempt", (attempt) => {
+  socket.io.on('reconnect_attempt', (attempt) => {
     console.log('Socket reconnect_attempt n', attempt);
     appState.connected = false;
   });
@@ -95,75 +115,110 @@ appStateEmitter.on('new-token', (newToken) => {
     }, [])
     .forEach((listener) => {
       log.info(`Adding listener for event ${listener.eventName}`);
-      socket.on(listener.eventName, listener.eventHandler(socket, app, appState, appConfig, runningApps));
+      socket.on(
+        listener.eventName,
+        listener.eventHandler(socket, app, appState, appConfig, runningApps),
+      );
     });
 
   appSockets[appConfig.roomsServer] = socket;
-  log.debug('appSockets added', appConfig.roomsServer);
+  log.debug('Added socket for url', appConfig.roomsServer);
 });
 
 new RoomsPowerMonitor(appState);
 log.info('App State', appState);
-app.whenReady()
-  .then(
-    () => {
-      if (!isDev) {
-        app.setLoginItemSettings({
-          openAtLogin: true,
-          path: process.execPath,
-          name: appConfig.appName
-        });
-      }
-    }
-  )
-  .then(
-    () =>  { // Start tray icon
-      const appTrayIcon = new Tray(`${__dirname}/images/fav.png`);
-      appTrayIcon.setTitle(appConfig.appName);
-      appTrayIcon.setToolTip(appConfig.appDescription);
-    }
-  )
-  .then(
-    async () => {
-
-      log.info('Collecting system information');
-      appState.primaryDisplay = {
-        ...screen.getPrimaryDisplay().workAreaSize
-      };
-      appState.sysInformation = await sysInformation();
-      log.info('Initializing ipc listeners');
-      ipcPing(app, appState, appConfig, runningApps, appSockets);
-      ipcAppConfig(app, appState, appConfig, runningApps, appSockets);
-      ipcAppState(app, appState, appConfig, runningApps, appSockets);
-      ipcLogin(app, appState, appConfig, runningApps, appSockets);
-      ipcCloseme(app, appState, appConfig, runningApps, appSockets);
-      ipcGetRandomNumber(app, appState, appConfig, runningApps, appSockets);
-      ipcChannels(app, appState, appConfig, runningApps, appSockets);
-      ipcMessages(app, appState, appConfig, runningApps, appSockets);
-      ipcNotifications(app, appState, appConfig, runningApps, appSockets);
-      ipcProxy(app, appState, appConfig, runningApps, appSockets);
-      log.info('App is ready!');
-
-      const apps = Object.keys(appstarters);
-      // console.log('Possible Apps', apps);
-      apps.forEach(async (appname) => {
-        log.info(`Considering ${appname} app.`);
-        const appDef = appstarters[appname];
-        if (appDef.autoStart || (!appState.authenticated && appDef.canAuthenticate)) {
-          startApplication(appState, runningApps, appname);
-        }
+app
+  .whenReady()
+  .then(() => {
+    if (!isDev) {
+      app.setLoginItemSettings({
+        openAtLogin: true,
+        path: process.execPath,
+        name: appConfig.appName,
       });
-
     }
-  );
+  })
+  .then(() => {
+    // Start tray icon
+    const appTrayIcon = new Tray(`${__dirname}/images/fav.png`);
+    appTrayIcon.setTitle(appConfig.appName);
+    appTrayIcon.setToolTip(appConfig.appDescription);
+  })
+  .then(
+    // Create hidden window which will be used as a proxy resolver
+    async () => {
+      const win = await createHiddenWindow();
+      const session = win.webContents.session;
+      promiseWhile(() => true, () => {
+        return Promise.delay(2000).then(
+          () => session.resolveProxy(appConfig.roomsServer)
+        )
+        .then(
+          (proxyUrl) => {
+            if (proxyUrl === 'DIRECT') {
+              if (appConfig.proxyHost) {
+                appConfig.proxyHost = null;
+                appConfig.proxyPort = null;
+              }
+            } else {
+              const proxyUrlComponents = proxyUrl.split(':');
+              const proxyHost = proxyUrlComponents[0].split(' ')[1];
+              const proxyPort = parseInt(proxyUrlComponents[1], 10);
+              // console.log('Proxy Host', proxyHost);
+              // console.log('Proxy Port', proxyPort);
+              if (appConfig.proxyHost !== proxyHost) {
+                appConfig.proxyHost = proxyHost;
+              }
+              if (appConfig.proxyPort !== proxyPort) {
+                appConfig.proxyPort = proxyPort;
+              }
+            }
+          }
+        )
+      })
+      // session.resolveProxy('https://www.google.com', (proxyUrl) => {
+      //   console.log('proxyUrl ', proxyUrl );
+      // });
+    },
+  )
+  .then(async () => {
+    log.info('Collecting system information');
+    appState.primaryDisplay = {
+      ...screen.getPrimaryDisplay().workAreaSize,
+    };
+    appState.sysInformation = await sysInformation();
+    log.info('Initializing ipc listeners');
+    ipcPing(app, appState, appConfig, runningApps, appSockets);
+    ipcAppConfig(app, appState, appConfig, runningApps, appSockets);
+    ipcAppState(app, appState, appConfig, runningApps, appSockets);
+    ipcLogin(app, appState, appConfig, runningApps, appSockets);
+    ipcCloseme(app, appState, appConfig, runningApps, appSockets);
+    ipcGetRandomNumber(app, appState, appConfig, runningApps, appSockets);
+    ipcChannels(app, appState, appConfig, runningApps, appSockets);
+    ipcMessages(app, appState, appConfig, runningApps, appSockets);
+    ipcNotifications(app, appState, appConfig, runningApps, appSockets);
+    ipcProxy(app, appState, appConfig, runningApps, appSockets);
+    log.info('App is ready!');
 
-
+    const apps = Object.keys(appstarters);
+    // console.log('Possible Apps', apps);
+    apps.forEach(async (appname) => {
+      log.info(`Considering ${appname} app.`);
+      const appDef = appstarters[appname];
+      if (
+        appDef.autoStart ||
+        (!appState.authenticated && appDef.canAuthenticate)
+      ) {
+        startApplication(appState, runningApps, appname);
+      }
+    });
+  });
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
-    // On OS X it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
-        app.quit()
-    }
+  // On OS X it is common for applications and their menu bar
+  // to stay active until the user quits explicitly with Cmd + Q
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });

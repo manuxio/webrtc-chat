@@ -51,8 +51,8 @@ class ChatNoChannel extends Component {
     return (
       <>
         <Box
+          className={"maximumHeight"}
           sx={{
-            height: '100vh',
             width: 'calc(100vw - 80px - 250px)',
             backgroundColor: '#2f3c42',
             display: "flex",

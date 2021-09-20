@@ -13,7 +13,6 @@ import channels from './reducers/channels';
 import messages from './reducers/messages';
 import alerts from './reducers/alerts';
 import users from './reducers/users';
-import videoChat from './reducers/videoChat';
 // Use ES6 object literal shorthand syntax to define the object shape
 
 const makeDummyReducer = (defState) => (state) => {
@@ -31,7 +30,6 @@ const mainReducers = combineReducers({
   appState,
   login,
   ipcRequests,
-  videoChat,
   messages: makeDummyReducer({ messages: {}}),
   users: makeDummyReducer({ users: {}}),
   channels: makeDummyReducer({ channels: undefined }),
@@ -44,8 +42,6 @@ const specialReducers = combineReducersWithFullState({
   appConfig: makeDummyReducer(),
   appState: makeDummyReducer(),
   login: makeDummyReducer(),
-  ipcRequests: makeDummyReducer(),
-  videoChat: makeDummyReducer(),
   channels,
   users,
   messages,

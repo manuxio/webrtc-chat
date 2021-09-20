@@ -86,9 +86,9 @@ class Chat extends Component {
       >
         <Box
           component="nav"
+          className={"maximumHeight"}
           sx={{
             width: 250,
-            height: '100vh',
             backgroundColor: '#1e272c',
             paddingTop: '0px',
             borderRight: '1px solid #333f44',
@@ -101,7 +101,7 @@ class Chat extends Component {
           component="main"
           sx={{
             width: 'calc(100vw - 80px - 250px)',
-            height: '100vh',
+            height: '100%',
             backgroundColor: '#1e272c',
             paddingTop: '0px',
             borderRight: '1px solid #333f44'

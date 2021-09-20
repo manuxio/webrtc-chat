@@ -1,5 +1,5 @@
 import { BrowserWindow } from 'electron';
-import isDev from 'electron-is-dev';
+// import isDev from 'electron-is-dev';
 import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } from 'electron-devtools-installer';
 
 const createWindow = async (filenameOrUrl, options = {}) => {
@@ -24,7 +24,7 @@ const createWindow = async (filenameOrUrl, options = {}) => {
     })
   }
   // console.log('Loading url', `file://${__dirname}/${filename}`);
-  tmpWin.loadURL(filenameOrUrl);
+  filenameOrUrl && tmpWin.loadURL(filenameOrUrl);
   tmpWin.removeMenu();
   // console.log('Window created with id', tmpWin.id);
   return tmpWin;

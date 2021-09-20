@@ -5,18 +5,17 @@ import Box from '@material-ui/core/Box';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Badge from '@material-ui/core/Badge';
 
-
 import ForumOutlinedIcon from '@material-ui/icons/ForumOutlined';
 import PlaylistAddCheckOutlinedIcon from '@material-ui/icons/PlaylistAddCheckOutlined';
 import ToggleButton from '@material-ui/core/ToggleButton';
 import Stack from '@material-ui/core/Stack';
 import DashBoard from './DashBoard';
 import Chat from './Chat';
-import { withRouter } from "react-router";
+import { withRouter } from 'react-router';
 import { NavLink, Route } from 'react-router-dom';
 import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined';
+import VideoChat from './VideoChat';
 // import { styled, ThemeProvider, createTheme } from '@material-ui/core/styles';
-
 
 const mapStateToProps = (state) => {
   return {
@@ -26,22 +25,29 @@ const mapStateToProps = (state) => {
     appState: state.appState,
     user: state.appState.user,
     connected: state.appState.connected,
-    alerts: state.alerts
-  }
+    alerts: state.alerts,
+    videoChat: state.videoChat
+  };
 };
 
 const mapDispatchToProps = () => {
-  return {
-  };
+  return {};
 };
 const FancyLink = (props) => {
   // console.log('props', props);
   return (
-    <ToggleButton sx={{
+    <ToggleButton
+      sx={{
         borderRadius: '50%',
         marginBottom: '5px',
-        border: '0px'
-    }} selected={props.active} color="secondary" aria-label="delete" size="large" value={props.to}>
+        border: '0px',
+      }}
+      selected={props.active}
+      color="secondary"
+      aria-label="delete"
+      size="large"
+      value={props.to}
+    >
       {props.icon}
     </ToggleButton>
   );
@@ -52,16 +58,19 @@ const MyNavLink = (props) => {
   const {
     to,
     // match,
-    location
+    location,
   } = props;
   const isActive = location.pathname.includes(to);
   return (
     <NavLink to={to}>
-      <FancyLink active={isActive} icon={props.icon || props.children} to={to} />
+      <FancyLink
+        active={isActive}
+        icon={props.icon || props.children}
+        to={to}
+      />
     </NavLink>
-  )
-}
-
+  );
+};
 
 class AppSkeleton extends Component {
   constructor(props) {
@@ -69,77 +78,95 @@ class AppSkeleton extends Component {
     this.state = {
       username: '',
       password: '',
-      showPassword: false
-    }
+      showPassword: false,
+    };
   }
 
   render() {
-    const {
-      match,
-      location,
-      alerts
-    } = this.props;
+    const { match, location, alerts, videoChat } = this.props;
     // console.log('Match', match);
     // console.log('Location', location);
     // console.log('Props Skeleton', this.props);
+    const reduceHeight = videoChat && videoChat.sessionToken ? '120px' : '0px';
     return (
       <>
         <CssBaseline />
         <Stack
-          direction="row"
+          direction="column"
           justifyContent="flex-start"
           alignItems="flex-start"
           spacing={0}
         >
-          <Box
-            component="nav"
-            sx={{
-              width: 80,
-              height: '100vh',
-              backgroundColor: '#263237',
-              paddingTop: '15px',
-              borderRight: '1px solid #333f44'
-            }}
-          >
+          <VideoChat />
           <Stack
-            direction="column"
+            direction="row"
             justifyContent="flex-start"
-            alignItems="center"
-            spacing={1}
-            >
-              <MyNavLink to="/dashboard/" match={match} location={location}>
-                <DashboardOutlinedIcon />
-              </MyNavLink>
-              <MyNavLink to="/chat/" match={match} location={location}>
-                <Badge badgeContent={alerts.unseenMessages || null} color={alerts.unseenMentions > 0 ? 'secondary' : 'primary'}><ForumOutlinedIcon /></Badge>
-              </MyNavLink>
-              <MyNavLink to="/todos/" match={match} location={location} icon={<PlaylistAddCheckOutlinedIcon />} />
-            </Stack>
-          </Box>
-          <Box
-            component="main"
-            sx={{
-              width: 'calc(100vw - 80px)',
-              height: '100vh',
-              backgroundColor: '#263237',
-              paddingTop: '0px',
-              borderRight: '1px solid #333f44'
-            }}
+            alignItems="flex-start"
+            spacing={0}
           >
-            <Route path="/dashboard/">
-              <DashBoard />
-            </Route>
-            <Route path="/chat/">
-              <Chat />
-            </Route>
-          </Box>
+            <Box
+              component="nav"
+              className={"maximumHeight"}
+              sx={{
+                width: 80,
+                backgroundColor: '#263237',
+                paddingTop: '15px',
+                borderRight: '1px solid #333f44',
+              }}
+            >
+              <Stack
+                direction="column"
+                justifyContent="flex-start"
+                alignItems="center"
+                spacing={1}
+              >
+                <MyNavLink to="/dashboard/" match={match} location={location}>
+                  <DashboardOutlinedIcon />
+                </MyNavLink>
+                <MyNavLink to="/chat/" match={match} location={location}>
+                  <Badge
+                    badgeContent={alerts.unseenMessages || null}
+                    color={alerts.unseenMentions > 0 ? 'secondary' : 'primary'}
+                  >
+                    <ForumOutlinedIcon />
+                  </Badge>
+                </MyNavLink>
+                <MyNavLink
+                  to="/todos/"
+                  match={match}
+                  location={location}
+                  icon={<PlaylistAddCheckOutlinedIcon />}
+                />
+              </Stack>
+            </Box>
+            <Box
+              component="main"
+              className={"maximumHeight"}
+              sx={{
+                width: 'calc(100vw - 80px)',
+                backgroundColor: '#263237',
+                paddingTop: '0px',
+                borderRight: '1px solid #333f44',
+              }}
+            >
+              <Route path="/dashboard/">
+                <DashBoard />
+              </Route>
+              <Route path="/chat/">
+                <Chat />
+              </Route>
+            </Box>
+          </Stack>
         </Stack>
       </>
-    )
+    );
   }
 }
 
-const MyComponent = connect(mapStateToProps, mapDispatchToProps)(withTranslation('chat')(withRouter(AppSkeleton)));
+const MyComponent = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(withTranslation('chat')(withRouter(AppSkeleton)));
 export default function App() {
   return (
     <Suspense fallback="loading">

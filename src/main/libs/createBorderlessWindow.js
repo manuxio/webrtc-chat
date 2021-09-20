@@ -1,4 +1,3 @@
-import Promise from 'bluebird';
 import createWindow from './createWindow';
 
 const createBorderlessWindow = async (filenameOrUrl, options = {}) => {

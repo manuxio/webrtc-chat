@@ -30,6 +30,7 @@ import VideoCallOutlinedIcon from '@material-ui/icons/VideoCallOutlined';
 import VideocamOutlinedIcon from '@material-ui/icons/VideocamOutlined';
 import { doInvoke } from '../actions/ipcRequest';
 import VideoBar from './VideoBar';
+import { setVideoChat } from '../actions/videoChat';
 
 const StyledFab = styled(Fab)({
   position: 'absolute',
@@ -69,6 +70,9 @@ const mapStateToProps = (state, props, getState) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    setVideoChat: (videoChat) => {
+      return setVideoChat(dispatch)(videoChat);
+    },
     createVideoChat: (channel) => {
       return doInvoke(
         'proxy',
@@ -343,7 +347,7 @@ class ChatChannel extends Component {
     const videoSessionId = channel.videoSessionId || false;
     return (
       <>
-        <Box p={0} height="100vh" style={{ overflowY: 'auto' }}>
+        <Box p={0} className={"maximumHeight"} style={{ overflowY: 'auto' }}>
           <div
             style={{
               display: 'flex',
@@ -371,7 +375,7 @@ class ChatChannel extends Component {
                       .getTokenForSession(channel.videoSessionId)
                       .then((response) => {
                         console.log('Video Chat Token', response);
-                        this.setState({
+                        this.props.setVideoChat({
                           videoSessionToken: response
                         })
                       });
@@ -400,13 +404,6 @@ class ChatChannel extends Component {
                   </IconButton>
                 </div>
               </Toolbar>
-              {
-                videoSessionToken ? (
-                  <Toolbar>
-                    <VideoBar videoSessionToken={videoSessionToken} />
-                  </Toolbar>
-                ) : null
-              }
             </AppBar>
             <div
               style={{

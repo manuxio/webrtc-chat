@@ -37,7 +37,7 @@ class MyGroupCreator extends React.Component {
     } = this.state;
 
     return (
-      <Box p={0} height="100vh" style={{ overflowY: "auto" }}>
+      <Box p={0} className={"maximumHeight"} style={{ overflowY: "auto" }}>
         <AppBar position="static">
           <Toolbar variant="dense">
             <Typography
