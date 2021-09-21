@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import Box from '@material-ui/core/Box';
 import MicOff from '@material-ui/icons/MicOff';
 import VideocamOff from '@material-ui/icons/VideocamOff';
 import VolumeUp from '@material-ui/icons/VolumeUp';
@@ -59,43 +59,35 @@ export default class StreamComponent extends Component {
     console.log('Local User in stream component', this.props.user);
     const { user } = this.props;
     return (
-      <div className="OT_widget-container">
+      <Box>
         {this.props.user !== undefined &&
         this.props.user.getStreamManager() &&
         this.props.user.getStreamManager() !== undefined ? (
-          <div className="streamComponent" style={{ height: '120px' }}>
-            <OvVideoComponent
-              user={this.props.user}
-              mutedSound={this.state.mutedSound}
-              nickname={ user.type === 'remote' ? user.nickname : null }
-            />
-            <div id="statusIcons">
-              {!this.props.user.isVideoActive() ? (
-                <div id="camIcon">
-                  <VideocamOff id="statusCam" />
-                </div>
-              ) : null}
-
-              {!this.props.user.isAudioActive() ? (
-                <div id="micIcon">
-                  <MicOff id="statusMic" />
-                </div>
-              ) : null}
-            </div>
-            <div>
-              {!this.props.user.isLocal() && (
-                <IconButton id="volumeButton" onClick={this.toggleSound}>
-                  {this.state.mutedSound ? (
-                    <VolumeOff color="secondary" />
-                  ) : (
-                    <VolumeUp />
-                  )}
-                </IconButton>
-              )}
-            </div>
-          </div>
+            <Box sx={{ position: 'relative' }}>
+              <OvVideoComponent
+                user={this.props.user}
+                mutedSound={this.state.mutedSound}
+                nickname={user.type === 'remote' ? user.nickname : 'Tu'}
+              />
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: '4px',
+                  left: '4px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                {!this.props.user.isAudioActive() ? (
+                  <MicOff id="statusMic" size="small"/>
+                ) : null}
+                {!this.props.user.isVideoActive() ? (
+                  <VideocamOff id="statusCam" size="small"/>
+                ) : null}
+              </Box>
+            </Box>
         ) : null}
-      </div>
+      </Box>
     );
   }
 }

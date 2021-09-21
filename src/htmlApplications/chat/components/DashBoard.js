@@ -75,9 +75,9 @@ class DashBoard extends Component {
       <>
         <Box
           component="nav"
-          className="maximumHeight"
+          className="maximumWidth"
           sx={{
-            width: 'calc(100vw - 80px)',
+            height: '100vh',
             backgroundColor: '#2f3c42',
             padding: '15px',
           }}

@@ -2,3 +2,19 @@
 # yarn lockfile v1
 
 
+coffe-script@^0.0.1-security:
+  version "0.0.1-security"
+  resolved "https://registry.yarnpkg.com/coffe-script/-/coffe-script-0.0.1-security.tgz#dc07f870522517f40d5c4c54096094a5a3c56acf"
+  integrity sha512-ijv4SKSz8LEWFOA+HASf6OsL352XmiM7IXJhrub1E/eIaWEqHBiGWSDoR5uPL8Xet3sropZIQzYcMN8lSM3YiQ==
+
+node-gyp-build@^4.2.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.3.0.tgz#9f256b03e5826150be39c764bf51e993946d71a3"
+  integrity sha512-iWjXZvmboq0ja1pUGULQBexmxq8CV4xBhX7VDOTbL7ZR4FOowwY/VOtRxBN/yKxmdGoIp4j5ysNT4u3S2pDQ3Q==
+
+utf-8-validate@^5.0.5:
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/utf-8-validate/-/utf-8-validate-5.0.5.tgz#dd32c2e82c72002dc9f02eb67ba6761f43456ca1"
+  integrity sha512-+pnxRYsS/axEpkrrEpzYfNZGXp0IjC/9RIxwM5gntY4Koi8SHmUGSfxfWqxZdRxrtaoVstuOzUp/rbs3JSPELQ==
+  dependencies:
+    node-gyp-build "^4.2.0"

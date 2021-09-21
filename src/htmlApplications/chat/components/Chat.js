@@ -77,7 +77,6 @@ class Chat extends Component {
     // } = this.props;
     return (
       <>
-      <CssBaseline />
       <Stack
         direction="row"
         justifyContent="flex-start"
@@ -100,11 +99,11 @@ class Chat extends Component {
         <Box
           component="main"
           sx={{
-            width: 'calc(100vw - 80px - 250px)',
-            height: '100%',
+            height: '100vh',
             backgroundColor: '#1e272c',
             paddingTop: '0px',
-            borderRight: '1px solid #333f44'
+            borderRight: '1px solid #333f44',
+            flexGrow: 1
           }}
         >
           <Route exact path="/chat/">

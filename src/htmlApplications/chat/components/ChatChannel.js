@@ -87,14 +87,14 @@ const mapDispatchToProps = (dispatch) => {
           log.error(e);
         });
     },
-    getTokenForSession: (sessionId) => {
+    getTokenForSession: (channel) => {
       return doInvoke(
         'proxy',
         'chat:gettokenforvideosession',
-        sessionId,
+        channel,
       )(dispatch)
         .then((response) => {
-          log.info('Got token for session', sessionId);
+          log.info('Got token for session in channel', channel);
           return response;
         })
         .catch((e) => {
@@ -347,7 +347,7 @@ class ChatChannel extends Component {
     const videoSessionId = channel.videoSessionId || false;
     return (
       <>
-        <Box p={0} className={"maximumHeight"} style={{ overflowY: 'auto' }}>
+        <Box p={0} style={{ height: '100vh', overflowY: 'auto' }}>
           <div
             style={{
               display: 'flex',
@@ -372,12 +372,12 @@ class ChatChannel extends Component {
                 {videoSessionId && !videoSessionToken ? (
                   <StyledFab color="secondary" aria-label="add" onClick={() => {
                     this.props
-                      .getTokenForSession(channel.videoSessionId)
+                      .getTokenForSession(channel)
                       .then((response) => {
                         console.log('Video Chat Token', response);
                         this.props.setVideoChat({
                           videoSessionToken: response
-                        })
+                        });
                       });
                   }}>
                     <VideocamOutlinedIcon />

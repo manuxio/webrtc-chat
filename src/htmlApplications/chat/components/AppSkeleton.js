@@ -15,6 +15,7 @@ import { withRouter } from 'react-router';
 import { NavLink, Route } from 'react-router-dom';
 import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined';
 import VideoChat from './VideoChat';
+import VerticalVideoChat from './VerticalVideoChat';
 // import { styled, ThemeProvider, createTheme } from '@material-ui/core/styles';
 
 const mapStateToProps = (state) => {
@@ -26,7 +27,7 @@ const mapStateToProps = (state) => {
     user: state.appState.user,
     connected: state.appState.connected,
     alerts: state.alerts,
-    videoChat: state.videoChat
+    videoChat: state.videoChat,
   };
 };
 
@@ -91,13 +92,6 @@ class AppSkeleton extends Component {
     return (
       <>
         <CssBaseline />
-        <Stack
-          direction="column"
-          justifyContent="flex-start"
-          alignItems="flex-start"
-          spacing={0}
-        >
-          <VideoChat />
           <Stack
             direction="row"
             justifyContent="flex-start"
@@ -106,8 +100,8 @@ class AppSkeleton extends Component {
           >
             <Box
               component="nav"
-              className={"maximumHeight"}
               sx={{
+                height: '100vh',
                 width: 80,
                 backgroundColor: '#263237',
                 paddingTop: '15px',
@@ -141,12 +135,12 @@ class AppSkeleton extends Component {
             </Box>
             <Box
               component="main"
-              className={"maximumHeight"}
               sx={{
-                width: 'calc(100vw - 80px)',
+                height: '100vh',
                 backgroundColor: '#263237',
                 paddingTop: '0px',
                 borderRight: '1px solid #333f44',
+                flexGrow: 1
               }}
             >
               <Route path="/dashboard/">
@@ -156,8 +150,8 @@ class AppSkeleton extends Component {
                 <Chat />
               </Route>
             </Box>
+            <VerticalVideoChat />
           </Stack>
-        </Stack>
       </>
     );
   }

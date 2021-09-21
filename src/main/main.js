@@ -29,8 +29,9 @@ import ipcProxy from './libs/ipcListeners/proxy';
 import createHiddenWindow from './libs/createHiddenBrowser';
 import promiseWhile from './libs/promiseWhile';
 import Promise from 'bluebird';
-import ProxyAgent from 'proxy-agent';
-
+// import ProxyAgent from 'proxy-agent';
+// import ProxyAgent from 'electron-proxy-agent';
+import ProxyAgent from 'https-proxy-agent';
 // import playAudio from './libs/playAudio';
 
 let socket;
@@ -66,9 +67,15 @@ appStateEmitter.on('new-token', (newToken) => {
 
   log.debug('Connecting socket.io with new token');
   let agent;
+  // agent = new ProxyAgent(`http://${appConfig.proxyHost}:${appConfig.proxyPort}`);
   if (appConfig.proxyHost) {
-    agent = new ProxyAgent(`http://${appConfig.proxyHost}:${appConfig.proxyPort}`);
-    log.debug('Socket connecting via proxy', `http://${appConfig.proxyHost}:${appConfig.proxyPort}`)
+    agent = new ProxyAgent(`${appConfig.proxyHost.replace('PROXY ', 'http://')}`);
+    // agent = new ProxyAgent({
+    //   resolveProxy : function(url, callback) {
+    //     callback(`${appConfig.proxyHost}`);
+    //   }
+    // });
+    log.debug('Socket connecting via proxy', `${appConfig.proxyHost.replace('PROXY ', 'http://')}`, 'to', appConfig.roomsServer)
   }
   socket = io(appConfig.roomsServer, {
     transports: ['websocket'],
@@ -155,22 +162,19 @@ app
         )
         .then(
           (proxyUrl) => {
+            // console.log('proxyUrl', proxyUrl);
             if (proxyUrl === 'DIRECT') {
               if (appConfig.proxyHost) {
                 appConfig.proxyHost = null;
-                appConfig.proxyPort = null;
               }
             } else {
-              const proxyUrlComponents = proxyUrl.split(':');
-              const proxyHost = proxyUrlComponents[0].split(' ')[1];
-              const proxyPort = parseInt(proxyUrlComponents[1], 10);
-              // console.log('Proxy Host', proxyHost);
+              // const proxyUrlComponents = proxyUrl.split(':');
+              // const proxyHost = proxyUrlComponents[0];
+              // const proxyPort = parseInt(proxyUrlComponents[1], 10);
+              // // console.log('Proxy Host', proxyHost);
               // console.log('Proxy Port', proxyPort);
-              if (appConfig.proxyHost !== proxyHost) {
-                appConfig.proxyHost = proxyHost;
-              }
-              if (appConfig.proxyPort !== proxyPort) {
-                appConfig.proxyPort = proxyPort;
+              if (appConfig.proxyHost !== proxyUrl) {
+                appConfig.proxyHost = proxyUrl;
               }
             }
           }
