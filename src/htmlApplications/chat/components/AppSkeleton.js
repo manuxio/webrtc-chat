@@ -15,7 +15,7 @@ import { withRouter } from 'react-router';
 import { NavLink, Route } from 'react-router-dom';
 import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined';
 import VideoChat from './VideoChat';
-import VerticalVideoChat from './VerticalVideoChat';
+import VerticalVideoChat from './NewVerticalVideoChat';
 // import { styled, ThemeProvider, createTheme } from '@material-ui/core/styles';
 
 const mapStateToProps = (state) => {

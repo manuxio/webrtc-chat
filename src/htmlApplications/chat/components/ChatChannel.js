@@ -376,6 +376,7 @@ class ChatChannel extends Component {
                       .then((response) => {
                         console.log('Video Chat Token', response);
                         this.props.setVideoChat({
+                          videoSessionId: videoSessionId,
                           videoSessionToken: response
                         });
                       });

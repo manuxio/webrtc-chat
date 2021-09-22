@@ -52,7 +52,6 @@ class ChatNoChannel extends Component {
       <>
         <Box
           sx={{
-            width: 'calc(100vw - 80px - 250px)',
             height: '100vh',
             backgroundColor: '#2f3c42',
             display: "flex",

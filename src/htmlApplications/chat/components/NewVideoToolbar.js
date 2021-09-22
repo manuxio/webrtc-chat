@@ -74,6 +74,7 @@ export default class ToolbarComponent extends Component {
           flexDirection: 'row',
           marginBottom: '5px',
           marginTop: '5px',
+          justifyContent: 'flex-end'
         }}
       >
         {streamExists ? (
@@ -131,19 +132,6 @@ export default class ToolbarComponent extends Component {
             <StopScreenShare fontSize="small" color="secondary" />
           </IconButton>
         )}
-
-        <IconButton
-          size="small"
-          color="secondary"
-          className="navButton"
-          onClick={this.leaveSession}
-          id="navLeaveButton"
-          sx={{
-            marginLeft: 'auto',
-          }}
-        >
-          <PowerSettingsNew fontSize="small" />
-        </IconButton>
       </Box>
     );
   }

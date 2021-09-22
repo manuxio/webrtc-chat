@@ -15,6 +15,7 @@ const createWindow = async (filenameOrUrl, options = {}) => {
     },
     ...options
   });
+  require("@electron/remote/main").enable(tmpWin.webContents);
   if (options.devTools) {
     // tmpWin.webContents.openDevTools({mode:'detach'});
     await installExtension(REACT_DEVELOPER_TOOLS)

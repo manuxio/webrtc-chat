@@ -33,6 +33,8 @@ import Promise from 'bluebird';
 // import ProxyAgent from 'electron-proxy-agent';
 import ProxyAgent from 'https-proxy-agent';
 // import playAudio from './libs/playAudio';
+require('@electron/remote/main').initialize();
+
 
 let socket;
 const runningApps = {};

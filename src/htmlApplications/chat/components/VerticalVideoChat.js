@@ -9,6 +9,8 @@ import LocalVideo from './LocalVideo';
 import ToolbarComponent from './VideoToolbar';
 import { setVideoChat } from '../actions/videoChat';
 import log from 'electron-log';
+import { doInvoke } from '../actions/ipcRequest';
+
 // import AppSkeleton from './AppSkeleton';
 // import Backdrop from '@material-ui/core/Backdrop';
 // import CircularProgress from '@material-ui/core/CircularProgress';
@@ -33,6 +35,20 @@ const mapStateToProps = (state, props, getState) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    getTokenForSession: (channel) => {
+      return doInvoke(
+        'proxy',
+        'chat:gettokenforvideosession',
+        channel,
+      )(dispatch)
+        .then((response) => {
+          log.info('Got token for session in channel', channel);
+          return response;
+        })
+        .catch((e) => {
+          log.error(e);
+        });
+    },
     setVideoChat: (videoChat) => {
       return setVideoChat(dispatch)(videoChat);
     },
@@ -45,6 +61,7 @@ class VerticalVideoChat extends Component {
     this.OV = new OpenVidu();
     this.state = {
       localUser: new UserModel(),
+      desktopLocalUser: new UserModel(),
       subscribers: [],
     };
     //
@@ -56,14 +73,25 @@ class VerticalVideoChat extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { videoSession } = this.state;
+    const { videoSession, localUser } = this.state;
     const videoSessionToken = this.props.videoChat?.videoSessionToken;
     if (videoSessionToken) {
       if (
         !prevProps.videoChat ||
         prevProps.videoChat.videoSessionToken !== videoSessionToken
       ) {
-        this.joinSession();
+        if (videoSession) {
+          videoSession.disconnect();
+        }
+        localUser.setVideoActive(false);
+        localUser.setAudioActive(false);
+        this.setState({
+          videoSession: null,
+          subscribers: []
+        }, () => {
+          this.joinSession();
+        });
+
       }
     } else {
       if (videoSession) {
@@ -145,18 +173,18 @@ class VerticalVideoChat extends Component {
     console.log('[OPENVIDU] videoSession.connection', videoSession.connection);
     localUser.setConnectionId(videoSession.connection.connectionId);
     localUser.setScreenShareActive(false);
-    localUser.setVideoActive(true);
+    // localUser.setVideoActive(true);
     let publisher;
     if (videoSession.capabilities.publish) {
 
       publisher = await navigator.mediaDevices.enumerateDevices()
         .then(
           (devices) => {
-            log.log('[OPENVIDU] All devices', devices);
+            log.error('[OPENVIDU] All devices', devices);
             const audioDevice = devices.reduce((prev, curr) => {
               if (prev) return prev;
               if (curr.kind === 'audioinput') {
-                console.log('[OPENVIDU] First audio device', curr);
+                log.log('[OPENVIDU] First audio device', curr);
                 return curr.deviceId;
               }
               return prev;
@@ -164,7 +192,7 @@ class VerticalVideoChat extends Component {
             const videoDevice = devices.reduce((prev, curr) => {
               if (prev) return prev;
               if (curr.kind === 'videoinput') {
-                console.log('[OPENVIDU] First video device', curr);
+                log.log('[OPENVIDU] First video device', curr);
                 return curr.deviceId;
               }
               return prev;
@@ -177,7 +205,7 @@ class VerticalVideoChat extends Component {
         )
         .then(
           (foundDevices) => {
-            log.log('[OPENVIDU] Found devices', foundDevices);
+            log.debug('[OPENVIDU] Found devices', foundDevices);
             return this.OV.initPublisher(undefined, {
               audioSource: foundDevices.audioDevice,
               videoSource: foundDevices.videoDevice,
@@ -195,9 +223,16 @@ class VerticalVideoChat extends Component {
             if (result) {
               return videoSession.publish(result)
                 .then(() => {
-                  console.log('[OPENVIDU] Stream published');
-                  return result
-                });
+                  log.log('[OPENVIDU] Stream published');
+                  // localUser.setVideoActive(true);
+                  return result;
+                })
+                .catch(
+                  (e) => {
+                    log.log('Unable to publish', e);
+                    throw e;
+                  }
+                )
             }
             return result;
           }
@@ -239,7 +274,7 @@ class VerticalVideoChat extends Component {
       isScreenShareActive: localUser.isScreenShareActive(),
     });
     console.log('[OPENVIDU] Updating state');
-    this.setState({ localUser: localUser }, () => {
+    this.setState({ localUser: localUser, update: new Date() }, () => {
       console.log('[OPENVIDU] localUser', localUser);
       if (localUser.getStreamManager()) {
         console.log('[OPENVIDU] Waiting for stream play');
@@ -255,6 +290,7 @@ class VerticalVideoChat extends Component {
     });
   }
 
+
   joinSession() {
     console.log('[OPENVIDU] Creating session');
     this.setState(
@@ -263,6 +299,7 @@ class VerticalVideoChat extends Component {
       },
       () => {
         this.subscribeToStreamCreated();
+        this.subscribeToConnectionCreated();
         this.connectToSession();
       },
     );
@@ -278,7 +315,7 @@ class VerticalVideoChat extends Component {
     // On every Stream destroyed...
     this.state.videoSession.on('streamDestroyed', (event) => {
       // Remove the stream from 'subscribers' array
-      this.deleteSubscriber(event.stream);
+      this.deleteSubscriber(event.stream.connection.connectionId);
       // setTimeout(() => {
       //     this.checkSomeoneShareScreen();
       // }, 20);
@@ -287,23 +324,44 @@ class VerticalVideoChat extends Component {
     });
   }
 
-  subscribeToStreamCreated() {
+  subscribeToConnectionDestroyed() {
+    // On every Stream destroyed...
+    this.state.videoSession.on('connectionDestroyed', (event) => {
+      // Remove the stream from 'subscribers' array
+      this.deleteSubscriber(event.connection.connectionId);
+      // setTimeout(() => {
+      //     this.checkSomeoneShareScreen();
+      // }, 20);
+      event.preventDefault();
+      // this.updateLayout();
+    });
+  }
+
+  subscribeToConnectionCreated() {
     const { videoSession, subscribers, localUser } = this.state;
-    videoSession.on('streamCreated', (event) => {
-      console.log('[OPENVIDU] Stream Created!', event);
-      const subscriber = videoSession.subscribe(event.stream, undefined);
-      // var subscribers = this.state.subscribers;
-      subscriber.on('streamPlaying', (e) => {
-        // this.checkSomeoneShareScreen();
-        subscriber.videos[0].video.parentElement.classList.remove(
-          'custom-class',
-        );
-      });
+    videoSession.on('connectionCreated', (event) => {
+      log.log('[OPENVIDU] Connection Created', event.connection.connectionId, videoSession.connection.connectionId);
+      if (event.connection.connectionId === videoSession.connection.connectionId) {
+        return this.setState({
+          localUser,
+          updated: new Date()
+        });
+      }
       const newUser = new UserModel();
-      newUser.setStreamManager(subscriber);
-      newUser.setConnectionId(event.stream.connection.connectionId);
+      if (event.stream) {
+        const subscriber = videoSession.subscribe(event.stream, undefined);
+        // var subscribers = this.state.subscribers;
+        subscriber.on('streamPlaying', (e) => {
+          // this.checkSomeoneShareScreen();
+          subscriber.videos[0].video.parentElement.classList.remove(
+            'custom-class',
+          );
+        });
+        newUser.setStreamManager(subscriber);
+      }
+      newUser.setConnectionId(event.connection.connectionId);
       newUser.setType('remote');
-      const nickname = event.stream.connection.data.split('%')[0];
+      const nickname = event.connection.data.split('%')[0];
       console.log('nickname', nickname);
       newUser.setNickname(JSON.parse(nickname).clientData.fullName);
       subscribers.push(newUser);
@@ -326,17 +384,66 @@ class VerticalVideoChat extends Component {
     });
   }
 
-  deleteSubscriber(stream) {
+  subscribeToStreamCreated() {
+    const { videoSession, subscribers, localUser } = this.state;
+
+    videoSession.on('streamCreated', (event) => {
+      console.log('[OPENVIDU] Stream Created!', event);
+      const mySubscriber = subscribers.reduce((prev, curr) => {
+        if (prev) return prev;
+        if (curr.getConnectionId() === event.stream.connection.connectionId) {
+          return curr;
+        }
+        return undefined;
+      }, undefined);
+
+      const myStream = videoSession.subscribe(event.stream, undefined);
+      if (myStream) {
+        mySubscriber.setStreamManager(myStream);
+      }
+      // var subscribers = this.state.subscribers;
+      // subscriber.on('streamPlaying', (e) => {
+      //   // this.checkSomeoneShareScreen();
+      //   subscriber.videos[0].video.parentElement.classList.remove(
+      //     'custom-class',
+      //   );
+      // });
+      this.setState(
+        {
+          subscribers: subscribers,
+          update: new Date()
+        },
+        () => {
+          if (localUser) {
+            this.sendSignalUserChanged({
+              isAudioActive: localUser.isAudioActive(),
+              isVideoActive: localUser.isVideoActive(),
+              nickname: localUser.getNickname(),
+              isScreenShareActive: localUser.isScreenShareActive(),
+            });
+          }
+          // this.updateLayout();
+        },
+      );
+    });
+  }
+
+  deleteSubscriber(connectionId) {
     const remoteUsers = this.state.subscribers;
     const userStream = remoteUsers.filter(
-      (user) => user.getStreamManager().stream === stream,
+      (user) => {
+        return user.getConnectionId() === connectionId;
+      },
     )[0];
-    let index = remoteUsers.indexOf(userStream, 0);
-    if (index > -1) {
-      remoteUsers.splice(index, 1);
-      this.setState({
-        subscribers: remoteUsers,
-      });
+    if (userStream) {
+      let index = remoteUsers.indexOf(userStream, 0);
+      if (index > -1) {
+        remoteUsers.splice(index, 1);
+        this.setState({
+          subscribers: remoteUsers,
+          update: new Date()
+        });
+      }
     }
   }
 
@@ -381,7 +488,7 @@ class VerticalVideoChat extends Component {
     // const {
     //   user
     // } = this.props;
-    const { localStreamManager, localStreamPlaying, publisher, localUser } =
+    const { localStreamManager, localStreamPlaying, publisher, localUser, desktopLocalUser } =
       this.state;
     console.log('[OPENVIDU] Rendering', localUser);
     const { videoChat } = this.props;
@@ -401,7 +508,7 @@ class VerticalVideoChat extends Component {
           width: 0px;
         }
       `;
-    console.log('Local User', localUser, this.state.subscribers);
+    console.log('Full Subscribers', this.state.subscribers);
     return (
       <>
         {videoChat?.videoSessionToken ? <GlobalStyleOn /> : <GlobalStyleOff />}
@@ -425,13 +532,12 @@ class VerticalVideoChat extends Component {
                   alignItems="flex-start"
                   spacing={0}
                 >
-                  {localUser !== undefined && localUser.getStreamManager() && (
+                  {localUser !== undefined && (
                     <Box
-                      sx={{ display: 'flex', flexDirection: 'column' }}
+                      sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}
                     >
                       <StreamComponent
                         user={localUser}
-                        handleNickname={this.nicknameChanged}
                       />
                       <ToolbarComponent
                         sessionId={'mySessionId'}
@@ -448,14 +554,36 @@ class VerticalVideoChat extends Component {
                     </Box>
                   )}
                   <Box sx={{ flexGrow: 1 }}>
-                    {this.state.subscribers.map((sub, i) => (
-                      <Box key={sub.streamManager.stream.streamId} sx={{
+                    {this.state.subscribers.filter((sub) => sub.streamManager && sub.streamManager.stream).map((sub, i) => (
+                      <Box key={sub.getConnectionId()} sx={{
                         marginBottom: '5px'
                       }}>
-                        <StreamComponent
-                          user={sub}
-                          streamId={sub.streamManager.stream.streamId}
-                        />
+                        {
+                          sub.getStreamManager()
+                          ? <StreamComponent
+                            user={sub}
+                            streamId={sub.streamManager.stream.streamId}
+                          />
+                          : <StreamComponent
+                            user={sub}
+                          />
+                        }
+                      </Box>
+                    ))}
+                    {this.state.subscribers.filter((sub) => !sub.streamManager || !sub.streamManager.stream).map((sub, i) => (
+                      <Box key={sub.getConnectionId()} sx={{
+                        marginBottom: '5px'
+                      }}>
+                        {
+                          sub.getStreamManager()
+                          ? <StreamComponent
+                            user={sub}
+                            streamId={sub.streamManager.stream.streamId}
+                          />
+                          : <StreamComponent
+                            user={sub}
+                          />
+                        }
                       </Box>
                     ))}
                   </Box>

@@ -9,12 +9,12 @@ export default class OvVideoComponent extends Component {
 
   componentDidMount() {
     if (this.props && this.props.user.streamManager && !!this.videoRef) {
-      console.log('PROPS: ', this.props);
       this.props.user.getStreamManager().addVideoElement(this.videoRef.current);
     }
 
     if (
       this.props &&
+      this.props.user.streamManager &&
       this.props.user.streamManager.session &&
       this.props.user &&
       !!this.videoRef
@@ -34,13 +34,12 @@ export default class OvVideoComponent extends Component {
   }
 
   componentDidUpdate(props) {
-    if (props && !!this.videoRef) {
+    if (props && !!this.videoRef && this.props.user.getStreamManager()) {
       this.props.user.getStreamManager().addVideoElement(this.videoRef.current);
     }
   }
 
   render() {
-    console.log('OV VIDEO', this.props);
     const { nickname } = this.props;
     return (
       <>
