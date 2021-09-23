@@ -63,6 +63,10 @@ const getUser = (state) => {
   return state.appState.user;
 };
 
+const getUserAsString = (state) => {
+  return JSON.stringify(state.appState.user);
+};
+
 const getVideoChatAsString = (state) => {
   return JSON.stringify(state.videoChat.videoChat ? state.videoChat.videoChat : null)
 }
@@ -95,9 +99,9 @@ export const getMessages = createSelector(
 );
 
 export const getMe = createSelector(
-  [ getUser ],
-  ( user ) => {
-    return user;
+  [ getUserAsString ],
+  ( userAsString ) => {
+    return JSON.parse(userAsString);
   }
 );
 
