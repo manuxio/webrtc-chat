@@ -7,8 +7,10 @@ import IconButton from '@material-ui/core/IconButton';
 import MicOff from '@material-ui/icons/MicOff';
 import VideocamOff from '@material-ui/icons/VideocamOff';
 import HearingOutlinedIcon from '@material-ui/icons/HearingOutlined';
+import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import { doInvoke } from '../actions/ipcRequest';
 import { BrowserWindow } from '@electron/remote';
+import { getIsDev } from './selectors/chatChannel';
 
 export class MyVideoComponent extends Component {
   constructor(props) {
@@ -19,20 +21,40 @@ export class MyVideoComponent extends Component {
   }
 
   componentDidMount() {
-    this.componentDidUpdate();
+    this.componentDidUpdate({}, this.state);
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
     const { user } = this.props;
-    console.log('[OPENVIDU] [VIDEO] Re rendering?', user, user.getNickname())
-    if (this.videoRef) {
-      log.log('[OPENVIDU] [VIDEO] Playing!');
-      user.getStreamManager().addVideoElement(this.videoRef.current);
+    console.log('[OPENVIDU] [VIDEO] Re rendering?', user, user.getNickname());
+    if (this.state.nWin) {
+      if (!prevState.nWin) {
+        console.log('[OPENVIDU] should unsubscribe');
+        if (this.props.unsubscribeStream) {
+          this.props.unsubscribeStream(user.getStreamManager());
+        }
+      }
+    } else {
+      if (prevState.nWin) {
+        if (this.props.subscribeStream) {
+          this.props.subscribeStream(user);
+        }
+      } else {
+        if (this.videoRef) {
+          log.log('[OPENVIDU] [VIDEO] Playing!');
+          user.getStreamManager().addVideoElement(this.videoRef.current);
+        }
+      }
     }
   }
 
   windowClosed() {
     log.log('nWin is now closed');
+    if (this.state.nWin) {
+      this.setState({
+        nWin: null,
+      });
+    }
   }
 
   componentWillUnmount() {
@@ -40,14 +62,14 @@ export class MyVideoComponent extends Component {
       this.state.nWin.off('closed', this.boundWindowClosed);
       try {
         this.state.nWin.close();
-      } catch(e) {
+      } catch (e) {
         log.error(e);
       }
     }
   }
 
   render() {
-    const { user, sessionId } = this.props;
+    const { user, sessionId, appState } = this.props;
     const stream = user.getStreamManager().stream;
     console.log('[OPENVIDU] [VIDEO] RE-RENDERING', user.isVideoActive(), user);
     return (
@@ -55,16 +77,50 @@ export class MyVideoComponent extends Component {
         sx={{
           width: '190px',
           position: 'relative',
-          minHeight: '100px',
+          minHeight: '142px',
           marginBottom: '10px',
         }}
       >
-        <video
-          style={{ display: 'block', width: '190px' }}
-          autoPlay={true}
-          id={'video-' + stream.streamId}
-          ref={this.videoRef}
-        />
+        {!this.state.nWin ? (
+          <video
+            style={{ display: 'block', width: '190px' }}
+            autoPlay={true}
+            id={'video-' + stream.streamId}
+            ref={this.videoRef}
+          />
+        ) : (
+          <Box
+            sx={{
+              position: 'absolute',
+              textAlign: 'center',
+              width: '190px',
+              height: '142px',
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+            }}
+          >
+            <IconButton
+              disableRipple
+              sx={{ '&:hover': { backgroundColor: 'transparent' } }}
+              onClick={() => {
+                if (this.state.nWin) {
+                  this.state.nWin.close();
+                }
+              }}
+            >
+              <FullscreenExitIcon
+                sx={{
+                  marginTop: '15px',
+                  marginBottom: '20px',
+                  fontSize: '90px',
+                  color: '#a7a7a74f',
+                }}
+              />
+            </IconButton>
+          </Box>
+        )}
         {!user.isVideoActive() ? (
           <Box
             sx={{
@@ -108,7 +164,7 @@ export class MyVideoComponent extends Component {
             right: '4px',
           }}
         >
-          {!user.isLocal() ? (
+          {!user.isLocal() && !this.state.nWin ? (
             <IconButton
               color="primary"
               aria-label="upload picture"
@@ -125,28 +181,38 @@ export class MyVideoComponent extends Component {
                   webPreferences: {
                     nodeIntegration: true,
                     preload: '/preload.js',
-                    devTools: false,
+                    // devTools: appState.isDev ? true : false,
                     contextIsolation: false,
                     webSecurity: false,
                   },
+                  show: false
                 });
-                // await nWin.webContents.openDevTools({mode:'detach'})
+                // appState.isDev &&
+                //   (await nWin.webContents.openDevTools({ mode: 'detach' }));
                 await nWin.removeMenu();
-                const urlPrefix = 'http://localhost:1212/'; //  : `file://${__dirname}/../renderer/`;
-                await this.props.getTokenForSession({ _id: sessionId })
-                  .then(
-                    async (sessionToken) => {
-                      const appUrl = `${urlPrefix}viduplayer.html?targetConnectionId=${user.getConnectionId()}&sessionToken=${encodeURIComponent(sessionToken)}`;
-                      await nWin.webContents.loadURL(appUrl);
+                // console.log('__dirname', __dirname);
+                // console.log('appState', this.props.appState);
+                const urlPrefix = appState.isDev
+                  ? 'http://localhost:1212/'
+                  : `file://${__dirname}/`;
+                await this.props
+                  .getTokenForSession({ _id: sessionId })
+                  .then(async (sessionToken) => {
+                    const appUrl = `${urlPrefix}viduplayer.html?targetConnectionId=${user.getConnectionId()}&sessionToken=${encodeURIComponent(
+                      sessionToken,
+                    )}`;
+                    nWin.once('ready-to-show', async () => {
                       nWin.setTitle(user.getNickname());
-                      await nWin.show();
                       nWin.once('closed', this.boundWindowClosed);
-                      this.setState({
-                        nWin
-                      });
-                    }
-                  )
-
+                      nWin.on('show', () => {
+                        this.setState({
+                          nWin,
+                        });
+                      })
+                      nWin.show();
+                    })
+                    nWin.webContents.loadURL(appUrl);
+                  });
               }}
             >
               <FullscreenIcon />
@@ -171,7 +237,9 @@ export class MyVideoComponent extends Component {
 }
 
 const MyComponent = connect(
-  () => ({}),
+  (state) => ({
+    appState: getIsDev(state),
+  }),
   (dispatch) => {
     return {
       getTokenForSession: (ObjectWithId) => {
@@ -187,9 +255,9 @@ const MyComponent = connect(
           .catch((e) => {
             log.error(e);
           });
-      }
+      },
     };
-  }
+  },
 )(MyVideoComponent);
 
 export default MyComponent;

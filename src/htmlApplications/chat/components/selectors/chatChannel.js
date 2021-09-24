@@ -67,6 +67,12 @@ const getUserAsString = (state) => {
   return JSON.stringify(state.appState.user);
 };
 
+const getAppStateAsStringWithProps = (props = []) => (state) => {
+  const retval = {};
+  props.forEach((p) => retval[p] = state.appState[p]);
+  return JSON.stringify(retval);
+}
+
 const getVideoChatAsString = (state) => {
   return JSON.stringify(state.videoChat.videoChat ? state.videoChat.videoChat : null)
 }
@@ -127,6 +133,13 @@ export const getGroupChannels = createSelector(
   [getAllGroupChannelsWithoutPropsAsString(['stateChange', 'lastChange', 'lastSeen'])],
   (channels = []) => {
     return JSON.parse(channels);
+  }
+)
+
+export const getIsDev = createSelector(
+  [getAppStateAsStringWithProps(['isDev'])],
+  (smallAppState) => {
+    return JSON.parse(smallAppState);
   }
 )
 

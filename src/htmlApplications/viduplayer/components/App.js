@@ -210,7 +210,6 @@ export default class ViduPlayer extends Component {
         <CircularProgress color="primary" />
       </Backdrop>
       : <video
-          muted
           style={{ display: 'block' }}
           autoPlay={true}
           ref={this.videoRef}

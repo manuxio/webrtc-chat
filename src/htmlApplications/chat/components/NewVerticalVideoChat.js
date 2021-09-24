@@ -18,6 +18,8 @@ import Typography from '@material-ui/core/Typography';
 import PowerSettingsNew from '@material-ui/icons/PowerSettingsNew';
 import { setVideoChat } from '../actions/videoChat';
 import MyVideoToolbar from './NewVideoToolbar';
+import DesktopChoose from './DesktopChoose';
+const { desktopCapturer } = require('electron');
 
 class NewVerticalVideoChat extends Component {
   constructor(props) {
@@ -133,6 +135,20 @@ class NewVerticalVideoChat extends Component {
     );
   }
 
+  unsubscribeStream(stream) {
+    const { session } = this.state;
+    log.log('[OPENVIDU] unsubscribing from stream');
+    const subscriber = session.unsubscribe(stream);
+  }
+
+  subscribeStream(user) {
+    const { session } = this.state;
+    log.log('[OPENVIDU] subscribing to stream');
+    const subscriber = session.subscribe(user.getStreamManager().stream);
+    user.setStreamManager(subscriber);
+    this.setState({});
+  }
+
   subscribeToSessionEvents() {
     const { session } = this.state;
     log.log('[OPENVIDU] Preparing connectionCreated event');
@@ -150,19 +166,34 @@ class NewVerticalVideoChat extends Component {
         // Refresh
         return this.setState({});
       }
-      log.log(`[OPENVIDU] Remote connection created (from server)`, event.connection.data.split('%')[0]);
+      console.log(`[OPENVIDU] New Connection: `, event.connection);
+      log.log(
+        `[OPENVIDU] Remote connection created (from server)`,
+        event.connection.data.split('%')[0],
+      );
       let fullData = {};
       try {
         fullData = JSON.parse(event.connection.data.split('%')[0]).clientData;
       } catch (e) {
-        fullData = {
-          Name: event.connection.data.split('%')[0],
-          Surname: '',
-          videoActive: true,
-          audioDevice: true,
-          nickname: event.connection.data.split('%')[0],
-          screenShareActive: false
-        };
+        if (event.stream?.typeOfVideo === 'IPCAM') {
+          fullData = {
+            Name: event.connection.data.split('%')[0],
+            Surname: '',
+            videoActive: event.stream.videoActive,
+            audioActive: event.stream.audioActive,
+            nickname: event.connection.data.split('%')[0],
+            screenShareActive: false,
+          };
+        } else {
+          fullData = {
+            Name: event.connection.data.split('%')[0],
+            Surname: '',
+            videoActive: true,
+            audioActive: true,
+            nickname: event.connection.data.split('%')[0],
+            screenShareActive: false,
+          };
+        }
       }
       if (fullData.type === 'DETACHEDWINDOW') {
         return;
@@ -171,8 +202,8 @@ class NewVerticalVideoChat extends Component {
       const newUser = new UserModel();
       if (event.stream) {
         // Connection with a stream!
-        const remoteStream = session.subscribe(event.stream, undefined);
-        newUser.setStreamManager(remoteStream);
+        const subscriber = session.subscribe(event.stream, undefined);
+        newUser.setStreamManager(subscriber);
       }
       newUser.setConnectionId(event.connection.connectionId);
       newUser.setType('remote');
@@ -186,6 +217,9 @@ class NewVerticalVideoChat extends Component {
       newUser.setNickname(fullData.fullName);
       if (fullData.videoActive) {
         newUser.setVideoActive(true);
+      }
+      if (fullData.audioActive) {
+        newUser.setAudioActive(true);
       }
       console.log('[OPENVIDU] NEW USER', newUser, newUser.isVideoActive());
       subscribers.push(newUser);
@@ -276,7 +310,12 @@ class NewVerticalVideoChat extends Component {
       log.log('[OPENVIDU] Got new signal');
       const mySubscriber = subscribers.reduce((prev, curr) => {
         if (prev) return prev;
-        log.log('[OPENVIDU] Comparing', curr.getConnectionId(), 'with', event.from.connectionId);
+        log.log(
+          '[OPENVIDU] Comparing',
+          curr.getConnectionId(),
+          'with',
+          event.from.connectionId,
+        );
         if (curr.getConnectionId() === event.from.connectionId) {
           return curr;
         }
@@ -404,7 +443,14 @@ class NewVerticalVideoChat extends Component {
   }
 
   screenShare() {
-
+    desktopCapturer
+      .getSources({ types: ['window', 'screen'] })
+      .then((results) => {
+        console.log('Shareable screens', results);
+        this.setState({
+          shareSources: results,
+        });
+      });
   }
 
   notifyMyStatus() {
@@ -418,7 +464,7 @@ class NewVerticalVideoChat extends Component {
   }
 
   render() {
-    const { localUser, session, subscribers } = this.state;
+    const { localUser, session, subscribers, shareSources } = this.state;
     log.log(
       `[OPENVIDU] Rendering. Session connected? ${localUser.getConnectionId()}`,
     );
@@ -432,6 +478,7 @@ class NewVerticalVideoChat extends Component {
           width: '190px',
         }}
       >
+        {shareSources ? <DesktopChoose shareSources={shareSources} onClose={() => this.setState({ shareSources: null })}/> : null}
         <AppBar position="static">
           <Toolbar variant="dense">
             <Typography
@@ -440,18 +487,28 @@ class NewVerticalVideoChat extends Component {
               component="div"
               sx={{ flexGrow: 1 }}
             ></Typography>
-              <IconButton onClick={() => {
-                  this.props.setVideoChat({
-                    videoSessionToken: null
-                  })
-              }} size="small" color="secondary">
-                <PowerSettingsNew />
-              </IconButton>
+            <IconButton
+              onClick={() => {
+                this.props.setVideoChat({
+                  videoSessionToken: null,
+                });
+              }}
+              size="small"
+              color="secondary"
+            >
+              <PowerSettingsNew />
+            </IconButton>
           </Toolbar>
         </AppBar>
         {localUser.canBePlayed() ? (
           <>
-            <VideoComponent user={localUser} userNickName={localUser.getNickname()} videoActive={localUser.isVideoActive()} audioActive={localUser.isAudioActive()} sessionId={session.sessionId} />
+            <VideoComponent
+              user={localUser}
+              userNickName={localUser.getNickname()}
+              videoActive={localUser.isVideoActive()}
+              audioActive={localUser.isAudioActive()}
+              sessionId={session.sessionId}
+            />
             <MyVideoToolbar
               user={localUser}
               camStatusChanged={() => this.webcamStatusToggle()}
@@ -462,21 +519,36 @@ class NewVerticalVideoChat extends Component {
         ) : (
           <NoVideoComponent user={localUser} />
         )}
-        {subscribers.filter((u) => u.canBePlayed()).map((user) => {
-          console.log('[OPENVIDU] VIDEOUSER', user);
-          return (
-            <>
-                  <VideoComponent user={user} userNickName={user.getNickname()} videoActive={user.isVideoActive()} audioActive={user.isAudioActive()}  sessionId={session.sessionId} />
-            </>
-          );
-        })}
-        {subscribers.filter((u) => !u.canBePlayed()).map((user) => {
-          return (
-            <>
-                  <NoVideoComponent userNickName={localUser.getNickname()} user={user} />
-            </>
-          );
-        })}
+        {subscribers
+          .filter((u) => u.canBePlayed())
+          .map((user) => {
+            console.log('[OPENVIDU] VIDEOUSER', user);
+            return (
+              <>
+                <VideoComponent
+                  subscribeStream={(stream) => this.subscribeStream(stream)}
+                  unsubscribeStream={(stream) => this.unsubscribeStream(stream)}
+                  user={user}
+                  userNickName={user.getNickname()}
+                  videoActive={user.isVideoActive()}
+                  audioActive={user.isAudioActive()}
+                  sessionId={session.sessionId}
+                />
+              </>
+            );
+          })}
+        {subscribers
+          .filter((u) => !u.canBePlayed())
+          .map((user) => {
+            return (
+              <>
+                <NoVideoComponent
+                  userNickName={localUser.getNickname()}
+                  user={user}
+                />
+              </>
+            );
+          })}
       </Box>
     );
   }
@@ -494,7 +566,7 @@ const mapDispatchToProps = (dispatch) => {
     setVideoChat: (videoChat) => {
       return setVideoChat(dispatch)(videoChat);
     },
-  }
+  };
 };
 
 const MyComponent = connect(

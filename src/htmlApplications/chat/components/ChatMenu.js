@@ -326,7 +326,7 @@ class MyChatMenu extends Component {
     const { panels, createChannelModalOpen, usersFilter, backdrop } =
       this.state;
     const { t, history, users, me, directchannels } = this.props;
-    console.log('directchannels', directchannels);
+    // console.log('directchannels', directchannels);
     const usersToShow =
       directchannels && users
         ? users

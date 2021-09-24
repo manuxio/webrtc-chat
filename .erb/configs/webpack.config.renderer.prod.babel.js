@@ -47,6 +47,11 @@ export default merge(baseConfig, {
       'core-js',
       'regenerator-runtime/runtime',
       path.join(webpackPaths.srcRendererPath, 'login', 'index.js')
+    ],
+    viduplayer: [
+      'core-js',
+      'regenerator-runtime/runtime',
+      path.join(webpackPaths.srcRendererPath, 'viduplayer', 'index.js')
     ]
   },
 
@@ -209,6 +214,20 @@ export default merge(baseConfig, {
     new HtmlWebpackPlugin({
       filename: path.join('sampleapp.html'),
       chunks: ['sampleapp'],
+      template: path.join(webpackPaths.srcRendererPath, 'index.ejs'),
+      minify: {
+        collapseWhitespace: true,
+        removeAttributeQuotes: true,
+        removeComments: true,
+      },
+      isBrowser: false,
+      env: process.env.NODE_ENV,
+      isDevelopment: process.env.NODE_ENV !== 'production',
+      nodeModules: webpackPaths.appNodeModulesPath,
+    }),
+    new HtmlWebpackPlugin({
+      filename: path.join('viduplayer.html'),
+      chunks: ['viduplayer'],
       template: path.join(webpackPaths.srcRendererPath, 'index.ejs'),
       minify: {
         collapseWhitespace: true,

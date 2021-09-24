@@ -336,7 +336,7 @@ class ChatChannel extends Component {
     const {
       videoSessionToken
     } = this.state;
-    console.log('videoSessionToken', videoSessionToken);
+    // console.log('videoSessionToken', videoSessionToken);
     const channelName =
       channel.type === 'group'
         ? `#${channel.name}`

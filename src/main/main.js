@@ -50,6 +50,7 @@ const appState = new Proxy(
     user: null,
     sysInformation: null,
     focusedApps: [],
+    isDev
   },
   appStateObserver(app, runningApps, appStateEmitter),
 );

@@ -11,7 +11,7 @@ const browserOptions = {
   height: 700,
   minWidth: 1024,
   minHeight: 768,
-  devTools: isDev ? true : false
+  devTools: isDev ? true : true
 };
 const borderLess = false;
 const hideOnClose = true;

@@ -9,7 +9,7 @@ const canAuthenticate = true;
 const browserOptions = {
   width: 280,
   height: 316,
-  devTools: isDev ? false : false
+  devTools: isDev ? true : true
 };
 const hideOnClose = true;
 const animate = true;
