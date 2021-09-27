@@ -168,6 +168,7 @@ export default function Editor({ channelName, tags, onSubmit, passEditor }) {
           // console.log(code, shiftKey, ctrlKey, mentionsOpen);
           if ((code === 'Enter' || code === 'NumpadEnter') && !shiftKey && !ctrlKey && !mentionsOpen) {
             const html = editor.current.getEditor().root.innerHTML;
+            handleChange('\n');
             const $ = cheerio.load(html);
             const mentions = [];
             $('span.mention').each(function() {
@@ -203,9 +204,10 @@ export default function Editor({ channelName, tags, onSubmit, passEditor }) {
             };
             // console.log(JSON.stringify(result));
             if (onSubmit) {
-              handleChange('\n');
               // editor.current.getEditor().enable(false);
-              onSubmit(newMessage)
+              setImmediate(() => {
+                onSubmit(newMessage)
+              });
                 // .then(
                 //   (result) => {
                 //     console.log('Message sent in editor', result);
@@ -217,9 +219,6 @@ export default function Editor({ channelName, tags, onSubmit, passEditor }) {
                 //     // editor.current.getEditor().enable(true);
                 //   }
                 // )
-            } else {
-              handleChange('\n');
-              // editor.current.getEditor().enable(true);
             }
           }
         }}
