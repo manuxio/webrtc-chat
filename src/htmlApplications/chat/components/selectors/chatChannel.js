@@ -10,6 +10,11 @@ const getAllMessages = (state) => {
   return state.messages.messages;
 };
 
+const getAllMessagesAsString = (state) => {
+  // console.log('MMMM', state.messages);
+  return JSON.stringify(state.messages.messages);
+};
+
 // const getAllMessagesAsString = (state) => {
 //   // console.log('MMMM', state.messages);
 //   return JSON.stringify(state.messages.messages);
@@ -78,11 +83,11 @@ const getVideoChatAsString = (state) => {
 }
 
 export const getMessagesAsString = createSelector(
-  [ getChannelId, getAllMessages ],
-  (channelId, messagesByChannel) => {
+  [ getChannelId, getAllMessagesAsString ],
+  (channelId, messagesByChannelAsString) => {
     // console.log('Executing out getMessages function');
     // console.log('EXXXX', messagesByChannel);
-    return JSON.stringify(messagesByChannel[channelId]);
+    return JSON.stringify(JSON.parse(messagesByChannelAsString)[channelId]);
     // return messages.filter((m) => m.channel === channelId);
   }
 );
@@ -99,6 +104,7 @@ export const getMessages = createSelector(
   (messages = "[]" ) => {
     // console.log('Executing out getMessages function');
     // console.log('EXXXX', typeof messages, messages);
+    console.log('Editor Enter getMessages completed', (new Date()).getTime());
     return JSON.parse(messages);
     // return messages.filter((m) => m.channel === channelId);
   }

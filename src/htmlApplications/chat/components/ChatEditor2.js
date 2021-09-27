@@ -167,6 +167,7 @@ export default function Editor({ channelName, tags, onSubmit, passEditor }) {
           } = e;
           // console.log(code, shiftKey, ctrlKey, mentionsOpen);
           if ((code === 'Enter' || code === 'NumpadEnter') && !shiftKey && !ctrlKey && !mentionsOpen) {
+            console.log('Editor Enter Start Time', (new Date()).getTime());
             const html = editor.current.getEditor().root.innerHTML;
             handleChange('\n');
             const $ = cheerio.load(html);

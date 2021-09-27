@@ -45,6 +45,7 @@ export const sendMessageAction = (dispatch) => {
       date: (new Date()).toISOString()
     };
     log.info('New Message', newMessage, newMessageAction(newMessage));
+    console.log('Editor Enter New Message Action Time', (new Date()).getTime());
     dispatch(newMessageAction(newMessage));
     return doInvoke('messages:sendto:request', newMessage)(dispatch)
       .then(

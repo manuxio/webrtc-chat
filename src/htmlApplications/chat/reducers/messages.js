@@ -113,13 +113,15 @@ export default function messagesReducer(
       }
       // messages[channel] = [...messages[channel], newMessage];
       // console.log('messages', messages);
-      return {
+      const newState = {
         ...state,
         messages: {
           ...messages,
-          [channel]: messages[channel].concat([newMessage]),
-        },
+          [channel]: messages[channel].concat([newMessage])
+        }
       };
+      console.log('Editor Enter reducer completed', (new Date()).getTime());
+      return newState;
     }
 
     case MESSAGES_UPDATEONE: {

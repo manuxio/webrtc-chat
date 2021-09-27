@@ -106,7 +106,7 @@ const mapDispatchToProps = (dispatch) => {
     },
     sendMessage: (...args) => {
       const [channel, message] = args;
-      setLastSeen(dispatch)(channel, message.date);
+      // setLastSeen(dispatch)(channel, message.date);
       return sendMessageAction(dispatch)(...args);
     },
     setChannelVisible: (...args) => {
