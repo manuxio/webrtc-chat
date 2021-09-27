@@ -8,10 +8,18 @@ import Tab from '@material-ui/core/Tab';
 import ImageListItem from '@material-ui/core/ImageListItem';
 import ImageList from '@material-ui/core/ImageList';
 import ImageListItemBar from '@material-ui/core/ImageListItemBar';
+import { styled } from '@material-ui/core/styles';
+
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
 
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
+
+// const ImageListItem
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -34,20 +42,28 @@ function TabPanel(props) {
 }
 
 const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 800,
-  maxHeight: 800,
-  overflowY: 'auto',
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
+  // position: 'absolute',
+  // top: '50%',
+  // left: '50%',
+  // transform: 'translate(-50%, -50%)',
+  // width: 800,
+  // maxHeight: 800,
+  // overflowY: 'auto',
+  // bgcolor: 'background.paper',
+  // border: '2px solid #000',
+  // boxShadow: 24,
+  // p: 4,
 };
 
-export default function BasicModal({ onClose, shareSources }) {
+const imgStyle = {
+  height: '500px',
+  backgroundColor: 'red',
+  '&:hover': {
+    border: '1px solid primary',
+  },
+};
+
+export default function BasicModal({ onClose, shareSources, setSource }) {
   const [isOpen, setOpen] = React.useState(true);
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -55,74 +71,98 @@ export default function BasicModal({ onClose, shareSources }) {
     onClose && onClose();
   };
   const [value, setValue] = React.useState('1');
-
+  const [screenId, setScreenId] = React.useState(null);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
   return (
-    <div>
-      <Modal
-        open={isOpen}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            aria-label="basic tabs example"
-          >
-            <Tab label="Finestre" value="1" />
-            <Tab label="Schermi" value="2" />
-          </Tabs>
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      fullWidth
+      maxWidth="md"
+      scroll="paper"
+    >
+      <DialogTitle>
+        <Tabs value={value} onChange={handleChange}>
+          <Tab label="Finestre" value="1" />
+          <Tab label="Schermi" value="2" />
+        </Tabs>
+      </DialogTitle>
+      <DialogContent>
+        <Box sx={{ width: '100%', height: '450px', overflowY: 'auto' }}>
           <TabPanel value={value} index={'1'}>
-          <Box sx={{ width: '700px', height: 450, overflowY: 'auto' }}>
-          <ImageList variant="masonry" cols={4} gap={20}>
+            <ImageList variant="masonry" cols={4} gap={20}>
               {shareSources
                 .filter((s) => s.id.indexOf('window') === 0)
                 .map((s) => {
                   return (
-
-                    <ImageListItem key={s.id}>
-                        <img
-                          src={s.thumbnail.toDataURL()}
-                          alt={s.name}
-                          loading="lazy"
-                          style={{ 'width': '140px'}}
-                        />
-                      <ImageListItemBar sx={{ textOverlow: 'ellipsis' }} subtitle={s.name} />
+                    <ImageListItem
+                      key={s.id}
+                      onClick={() => {
+                        setScreenId(s.id);
+                      }}
+                    >
+                      <img
+                        src={s.thumbnail.toDataURL()}
+                        alt={s.name}
+                        loading="lazy"
+                        style={{
+                          width: '140px',
+                          border: s.id === screenId ? '3px solid red' : '3px solid transparent',
+                        }}
+                      />
+                      <ImageListItemBar
+                        sx={{ textOverlow: 'ellipsis' }}
+                        subtitle={s.name}
+                      />
                     </ImageListItem>
                   );
                 })}
             </ImageList>
-            </Box>
           </TabPanel>
           <TabPanel value={value} index={'2'}>
-          <Box sx={{ width: '700px', height: 450, overflowY: 'auto' }}>
-          <ImageList variant="masonry" cols={4} gap={20}>
-          {shareSources
+            <ImageList variant="masonry" cols={4} gap={20}>
+              {shareSources
                 .filter((s) => s.id.indexOf('screen') === 0)
                 .map((s) => {
                   return (
-
-                    <ImageListItem key={s.id}>
-                        <img
-                          src={s.thumbnail.toDataURL()}
-                          alt={s.name}
-                          loading="lazy"
-                          style={{ 'width': '140px'}}
-                        />
-                      <ImageListItemBar sx={{ textOverlow: 'ellipsis' }} subtitle={s.name} />
+                    <ImageListItem
+                      sx={{
+                        color: 'success.dark',
+                        display: 'inline',
+                        fontWeight: 'medium',
+                        mx: 1,
+                      }}
+                      onClick={() => {
+                        setScreenId(s.id);
+                      }}
+                      key={s.id}
+                    >
+                      <img
+                        src={s.thumbnail.toDataURL()}
+                        alt={s.name}
+                        loading="lazy"
+                        style={{ width: '160px', border: s.id === screenId ? '3px solid red' : '3px solid transparent',}}
+                      />
+                      <ImageListItemBar
+                        sx={{ textOverlow: 'ellipsis' }}
+                        subtitle={s.name}
+                      />
                     </ImageListItem>
                   );
                 })}
             </ImageList>
-            </Box>
           </TabPanel>
         </Box>
-      </Modal>
-    </div>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => {handleClose()}}>Cancel</Button>
+        <Button variant="contained" disabled={!screenId} onClick={() => {
+          setSource(screenId);
+        }}>Share</Button>
+      </DialogActions>
+    </Dialog>
   );
 }

@@ -4,9 +4,11 @@ import { OpenVidu } from 'openvidu-browser';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import qs from 'qs';
 import Backdrop from '@material-ui/core/Backdrop';
+import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import UserModel from './UserModel';
 import Promise from 'bluebird';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import './App.css';
 // import '../styles/App.css';
 
@@ -45,7 +47,7 @@ export default class ViduPlayer extends Component {
   }
   componentDidUpdate() {
     const [user] = this.state.subscribers;
-    console.log('[OPENVIDU] [VIDEO] Re rendering?', user, user?.getNickname())
+    console.log('[OPENVIDU] [VIDEO] Re rendering?', user, user?.getNickname());
     if (this.videoRef && user && user.canBePlayed()) {
       log.log('[OPENVIDU] [VIDEO] Playing!');
       user.getStreamManager().addVideoElement(this.videoRef.current);
@@ -59,8 +61,11 @@ export default class ViduPlayer extends Component {
         session,
       },
       () => {
-        this.subscribeToSessionEvents()
-          .then(() => this.state.session.connect(this.state.sessionToken, { clientData: { type: 'DETACHEDWINDOW' } }))
+        this.subscribeToSessionEvents().then(() =>
+          this.state.session.connect(this.state.sessionToken, {
+            clientData: { type: 'DETACHEDWINDOW' },
+          }),
+        );
       },
     );
   }
@@ -78,7 +83,10 @@ export default class ViduPlayer extends Component {
         log.log(`[OPENVIDU] Ignoring connection`, newConnectionId);
         return this.setState({});
       }
-      log.log(`[OPENVIDU] Remote connection created (from server)`, event.connection.data.split('%')[0]);
+      log.log(
+        `[OPENVIDU] Remote connection created (from server)`,
+        event.connection.data.split('%')[0],
+      );
       let fullData = {};
       try {
         fullData = JSON.parse(event.connection.data.split('%')[0]).clientData;
@@ -89,7 +97,7 @@ export default class ViduPlayer extends Component {
           videoActive: true,
           audioDevice: true,
           nickname: event.connection.data.split('%')[0],
-          screenShareActive: false
+          screenShareActive: false,
         };
       }
       if (fullData.type === 'DETACHEDWINDOW') {
@@ -110,11 +118,9 @@ export default class ViduPlayer extends Component {
         newUser.setVideoActive(true);
       }
       subscribers.push(newUser);
-      return this.setState(
-        {
-          subscribers: subscribers,
-        },
-      );
+      return this.setState({
+        subscribers: subscribers,
+      });
     });
     log.log('[OPENVIDU] Preparing streamCreated event');
     session.on('streamCreated', (event) => {
@@ -191,30 +197,51 @@ export default class ViduPlayer extends Component {
   }
 
   render() {
-    const {
-      subscribers
-    } = this.state;
+    const { subscribers } = this.state;
     const user = subscribers[0];
     // const {
     //   connectionId,
     //   sessionToken
     // } = this.state;
-    console.log('R', subscribers);
-    return <ThemeProvider theme={mainTheme}>
-      {
-        !user || !user.canBePlayed()
-        ? <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open
-      >
-        <CircularProgress color="primary" />
-      </Backdrop>
-      : <video
-          style={{ display: 'block' }}
-          autoPlay={true}
-          ref={this.videoRef}
-        />
-      }
-    </ThemeProvider>;
+    return (
+      <>
+      <CssBaseline />
+      <ThemeProvider theme={mainTheme}>
+        {!user || !user.canBePlayed() ? (
+          <Backdrop
+            sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open
+          >
+            <CircularProgress color="primary" />
+          </Backdrop>
+        ) : (
+          <Box
+            sx={{
+              width: '100vw',
+              position: 'relative',
+              height: '100vh',
+              margin: '0px',
+              padding: '0px',
+              backgroundColor: 'black'
+            }}
+          >
+            <video
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                display: 'block',
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+              }}
+              autoPlay={true}
+              ref={this.videoRef}
+            />
+          </Box>
+        )}
+      </ThemeProvider>
+      </>
+    );
   }
 }

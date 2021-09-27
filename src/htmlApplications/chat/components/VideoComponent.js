@@ -77,13 +77,21 @@ export class MyVideoComponent extends Component {
         sx={{
           width: '190px',
           position: 'relative',
-          minHeight: '142px',
+          height: '110px',
           marginBottom: '10px',
         }}
       >
         {!this.state.nWin ? (
           <video
-            style={{ display: 'block', width: '190px' }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              display: 'block',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
             autoPlay={true}
             id={'video-' + stream.streamId}
             ref={this.videoRef}
@@ -181,14 +189,14 @@ export class MyVideoComponent extends Component {
                   webPreferences: {
                     nodeIntegration: true,
                     preload: '/preload.js',
-                    // devTools: appState.isDev ? true : false,
+                    devTools: appState.isDev ? true : false,
                     contextIsolation: false,
                     webSecurity: false,
                   },
                   show: false
                 });
-                // appState.isDev &&
-                //   (await nWin.webContents.openDevTools({ mode: 'detach' }));
+                appState.isDev &&
+                  (await nWin.webContents.openDevTools({ mode: 'detach' }));
                 await nWin.removeMenu();
                 // console.log('__dirname', __dirname);
                 // console.log('appState', this.props.appState);
@@ -229,7 +237,7 @@ export class MyVideoComponent extends Component {
             textShadow: '#151413 1px 0 10px',
           }}
         >
-          {user.isLocal() ? 'Tu' : user.getNickname()}
+          {user.isLocal() ? 'Tu' : user.getNickname()}{user.type === 'desktop' ? ' (condivisione)' : ''}
         </Box>
       </Box>
     );

@@ -66,6 +66,7 @@ export default class ToolbarComponent extends Component {
   render() {
     const mySessionId = this.props.sessionId;
     const localUser = this.props.user;
+    const desktopUser = this.props.desktopUser;
     const streamExists = this.props.user.getStreamManager();
     return (
       <Box
@@ -109,21 +110,17 @@ export default class ToolbarComponent extends Component {
           </IconButton>
         ) : null}
 
-        {streamExists ? (
+        {localUser && !localUser.isScreenShareActive()? (
           <IconButton
             size="small"
             color="inherit"
             className="navButton"
             onClick={this.screenShare}
           >
-            {localUser !== undefined && localUser.isScreenShareActive() ? (
-              <PictureInPicture fontSize="small" />
-            ) : (
-              <ScreenShare fontSize="small" />
-            )}
+            <ScreenShare fontSize="small" />
           </IconButton>
         ) : null}
-        {localUser !== undefined && localUser.isScreenShareActive() && (
+        {localUser && localUser.isScreenShareActive() && (
           <IconButton
             size="small"
             onClick={this.stopScreenShare}

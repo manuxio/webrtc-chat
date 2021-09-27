@@ -189,6 +189,7 @@ app
     },
   )
   .then(async () => {
+    log.info(log.levels, log.transports);
     log.info('Collecting system information');
     appState.primaryDisplay = {
       ...screen.getPrimaryDisplay().workAreaSize,

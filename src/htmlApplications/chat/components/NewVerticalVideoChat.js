@@ -19,6 +19,7 @@ import PowerSettingsNew from '@material-ui/icons/PowerSettingsNew';
 import { setVideoChat } from '../actions/videoChat';
 import MyVideoToolbar from './NewVideoToolbar';
 import DesktopChoose from './DesktopChoose';
+import { doInvoke } from '../actions/ipcRequest';
 const { desktopCapturer } = require('electron');
 
 class NewVerticalVideoChat extends Component {
@@ -46,10 +47,18 @@ class NewVerticalVideoChat extends Component {
         nickname: `${myName} (${props.t('schermo')})`,
       }),
     );
+    localDesktopUser.setFullData(
+      Object.assign({}, props.me, {
+        nickname: `${myName} (${props.t('schermo')})`,
+        Name: `${props.me.Name}`,
+        Surname: `${props.me.Surname} (${props.t('schermo')})`,
+      }),
+    );
     localDesktopUser.setType('desktop');
 
     this.state = {
       session: null,
+      shareSession: null,
       localUser,
       localDesktopUser,
       subscribers: [],
@@ -60,28 +69,31 @@ class NewVerticalVideoChat extends Component {
     this.componentDidUpdate({});
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     const { videoChat } = this.props;
-    const { session, localUser, localDesktopUser } = this.state;
+    const { session, shareSession, localUser, localDesktopUser } = this.state;
     const { videoSessionToken, videoSessionName } = videoChat || {};
     const { videoSessionToken: prevVideoSessionToken } =
       prevProps.videoChat || {};
 
     if (videoSessionToken && videoSessionToken !== prevVideoSessionToken) {
       // New token
-      log.log('[OPENVIDU] Got a new session token!');
       if (session) {
         session.disconnect();
       }
+      if (shareSession) {
+        shareSession.disconnect();
+      }
       localUser.setVideoActive(false);
       localUser.setAudioActive(false);
-      localDesktopUser.setVideoActive(false);
+      // localDesktopUser.setVideoActive(false);
 
       this.setState(
         {
           localUser,
           localDesktopUser,
           session: null,
+          shareSession: null,
           subscribers: [],
         },
         () => {
@@ -89,30 +101,165 @@ class NewVerticalVideoChat extends Component {
         },
       );
     } else {
-      if (!videoSessionToken) {
+      if (!videoSessionToken && prevVideoSessionToken) {
         // No more token, we're closing
-        if (session) {
-          log.log('[OPENVIDU] Leaving session!');
-          session.disconnect();
-          localUser.setVideoActive(false);
-          localUser.setAudioActive(false);
-          localUser.setConnectionId(null);
-          localDesktopUser.setVideoActive(false);
+        if (session || shareSession) {
+          if (session) {
+            console.log('[OPENVIDU] Leaving session!');
+            session.disconnect();
+            if (shareSession) {
+              shareSession.disconnect();
+            }
+            localUser.setVideoActive(false);
+            localUser.setAudioActive(false);
+            localUser.setConnectionId(null);
+            localUser.setStreamManager(null);
+            // localDesktopUser.setVideoActive(false);
+          }
+          if (shareSession) {
+            shareSession.disconnect();
+            localDesktopUser.setVideoActive(false);
+            localDesktopUser.setConnectionId(null);
+            localDesktopUser.setScreenShareActive(false);
+            localDesktopUser.setStreamManager(null);
+          }
+          console.log('[OPENVIDU] SetState after leaving session');
           this.setState({
             localUser,
             localDesktopUser,
             session: null,
+            shareSession: null,
             subscribers: [],
           });
+        }
+      }
+    }
+
+    if (this.state.shareSource && this.state.shareSource !== prevState.shareSource) {
+      console.log('[OPENVIDU] Start new screenshare', this.state.shareSource, localDesktopUser);
+      navigator.mediaDevices
+        .enumerateDevices()
+        .then((devices) => {
+          log.log('[OPENVIDU] All devices', devices.length);
+          const audioDevice = devices.reduce((prev, curr) => {
+            if (prev) return prev;
+            if (curr.kind === 'audioinput') {
+              log.log('[OPENVIDU] First audio device', curr);
+              return curr.deviceId;
+            }
+            return prev;
+          }, undefined);
+          const videoDevice = devices.reduce((prev, curr) => {
+            if (prev) return prev;
+            if (curr.kind === 'videoinput') {
+              log.log('[OPENVIDU] First video device', curr);
+              return curr.deviceId;
+            }
+            return prev;
+          }, undefined);
+          return {
+            audioDevice,
+            videoDevice,
+          };
+        })
+        .then((foundDevices) => {
+          log.debug('[OPENVIDU] Found devices', foundDevices);
+          return this.OV.getUserMedia({
+            audioSource: false,
+            videoSource: `screen:${this.state.shareSource}`,
+            // 'f889c3483de05701a789b1d57f889a10f814ab18aaede5e15d2d0892ebfd8fd8',
+            publishVideo: localUser.isVideoActive(),
+          });
+        })
+        .then(
+          (desktopStream) => {
+            return Promise.resolve()
+              .then(
+                () => {
+                  if (localUser.getStreamManager()) {
+                    // return session.unpublish(localUser.getStreamManager())
+                    console.log('desktopStream', desktopStream);
+                    const newTrack = desktopStream.getVideoTracks()[0];
+                    console.log('[OPENVIDU] New Track', newTrack);
+                    return localUser.getStreamManager()
+                      .replaceTrack(newTrack)
+                      .then(
+                        () => localUser.getStreamManager().publishVideo(true)
+                      )
+                  }
+                  return true;
+                }
+              )
+              .then(
+                () => {
+                  // localUser.setStreamManager(desktopPublisher);
+                  // return session.publish(desktopPublisher);
+                }
+              )
+              .then(
+                () => {
+                  localUser.setVideoActive(true);
+                  localUser.setScreenShareActive(true);
+                  return this.notifyMyStatus();
+                }
+              )
+              .then(
+                () => {
+                  this.setState({
+                    localUser
+                  });
+                }
+              )
+          }
+        )
+        .then(
+          () => {
+            console.log('[OPENVIDU] Desktop published!');
+          }
+        )
+        .catch(
+          (e) => {
+            console.error(e);
+          }
+        )
+
+    } else {
+      if (!this.state.shareSource && prevState.shareSource) {
+        console.log('[OPENVIDU] Stopping screen share!');
+        if (localUser.getStreamManager()) {
+          session.unpublish(localUser.getStreamManager())
+          .then(
+            () => {
+              localUser.setScreenShareActive(false);
+              localUser.setVideoActive(true);
+              // localUser.setAudioActive(false);
+            }
+          )
+          .then(
+            () => this.connectWebCam()
+          )
         }
       }
     }
   }
 
   componentWillUnmount() {
-    const { session } = this.state;
+    const { session, shareSession, localUser, localDesktopUser } = this.state;
     if (session) {
+      if (localUser.getStreamManager()) {
+        log.log('[OPENVIDU] Unpublishing localUser stream');
+        session.unpublish(localUser.getStreamManager());
+      }
+      log.log('[OPENVIDU] disconnecting localUser');
       session.disconnect();
+    }
+    if (shareSession) {
+      if (localDesktopUser.getStreamManager()) {
+        log.log('[OPENVIDU] Unpublishing localDesktopUser stream');
+        shareSession.unpublish(localDesktopUser.getStreamManager());
+      }
+      log.log('[OPENVIDU] disconnecting shareSession');
+      shareSession.disconnect();
     }
   }
 
@@ -153,110 +300,137 @@ class NewVerticalVideoChat extends Component {
     const { session } = this.state;
     log.log('[OPENVIDU] Preparing connectionCreated event');
     session.on('connectionCreated', (event) => {
-      const { subscribers } = this.state;
-      const {
-        connection: { connectionId: newConnectionId },
-      } = event;
-      const { connection: newConnection } = event;
-      const {
-        connection: { connectionId: myConnectionId },
-      } = session;
-      if (newConnectionId === myConnectionId) {
-        log.log(`[OPENVIDU] Local connection connected (from server)`);
-        // Refresh
-        return this.setState({});
-      }
-      console.log(`[OPENVIDU] New Connection: `, event.connection);
-      log.log(
-        `[OPENVIDU] Remote connection created (from server)`,
-        event.connection.data.split('%')[0],
-      );
-      let fullData = {};
-      try {
-        fullData = JSON.parse(event.connection.data.split('%')[0]).clientData;
-      } catch (e) {
-        if (event.stream?.typeOfVideo === 'IPCAM') {
-          fullData = {
-            Name: event.connection.data.split('%')[0],
-            Surname: '',
-            videoActive: event.stream.videoActive,
-            audioActive: event.stream.audioActive,
-            nickname: event.connection.data.split('%')[0],
-            screenShareActive: false,
-          };
-        } else {
-          fullData = {
-            Name: event.connection.data.split('%')[0],
-            Surname: '',
-            videoActive: true,
-            audioActive: true,
-            nickname: event.connection.data.split('%')[0],
-            screenShareActive: false,
-          };
-        }
-      }
-      if (fullData.type === 'DETACHEDWINDOW') {
-        return;
-      }
-
-      const newUser = new UserModel();
-      if (event.stream) {
-        // Connection with a stream!
-        const subscriber = session.subscribe(event.stream, undefined);
-        newUser.setStreamManager(subscriber);
-      }
-      newUser.setConnectionId(event.connection.connectionId);
-      newUser.setType('remote');
-      fullData.fullName = capitalize(
-        `${fullData.Name} ${fullData.Surname}`
-          .trim()
-          .replace(/\s\s+/g, ' ')
-          .toLowerCase(),
-      );
-      newUser.setFullData(fullData);
-      newUser.setNickname(fullData.fullName);
-      if (fullData.videoActive) {
-        newUser.setVideoActive(true);
-      }
-      if (fullData.audioActive) {
-        newUser.setAudioActive(true);
-      }
-      console.log('[OPENVIDU] NEW USER', newUser, newUser.isVideoActive());
-      subscribers.push(newUser);
-      return this.setState(
-        {
-          subscribers: subscribers,
-        },
-        () => {
-          this.notifyMyStatus();
-        },
-      );
+      Promise.delay(500)
+        .then(
+          () => {
+            const { subscribers, shareSession } = this.state;
+            const {
+              connection: { connectionId: newConnectionId },
+            } = event;
+            const { connection: newConnection } = event;
+            const {
+              connection: { connectionId: myConnectionId },
+            } = session;
+            let myShareConnectionId = null;
+            if (shareSession) {
+              console.log('[OPENVIDU] Before new usermodel, I have shareSession', shareSession, shareSession.connection);
+              myShareConnectionId = shareSession?.connection?.connectionId;
+            }
+            if (newConnectionId === myConnectionId) {
+              log.log(`[OPENVIDU] Local connection connected (from server)`);
+              // Refresh
+              return this.setState({});
+            }
+            if (newConnectionId === myShareConnectionId) {
+              log.log(`[OPENVIDU] Local (share) connection connected (from server)`);
+              // Refresh
+              return this.setState({});
+            }
+            console.log(`[OPENVIDU] New Connection: `, event.connection.connectionId, myConnectionId, myShareConnectionId);
+            log.warn(
+              `[OPENVIDU] Remote connection created (from server)`,
+              event.connection.data.split('%')[0],
+            );
+            let fullData = {};
+            try {
+              fullData = JSON.parse(event.connection.data.split('%')[0]).clientData;
+            } catch (e) {
+              if (event.stream?.typeOfVideo === 'IPCAM') {
+                fullData = {
+                  Name: event.connection.data.split('%')[0],
+                  Surname: '',
+                  videoActive: event.stream.videoActive,
+                  audioActive: event.stream.audioActive,
+                  nickname: event.connection.data.split('%')[0],
+                  screenShareActive: false,
+                };
+              } else {
+                fullData = {
+                  Name: event.connection.data.split('%')[0],
+                  Surname: '',
+                  videoActive: true,
+                  audioActive: true,
+                  nickname: event.connection.data.split('%')[0],
+                  screenShareActive: false,
+                };
+              }
+            }
+            if (fullData.type === 'DETACHEDWINDOW') {
+              return;
+            }
+            console.log('[OPENVIDU] Creating new user', )
+            const newUser = new UserModel();
+            if (event.stream) {
+              // Connection with a stream!
+              const subscriber = session.subscribe(event.stream, undefined);
+              console.log('[OPENVIDU] New connection has a stream!');
+              newUser.setStreamManager(subscriber);
+            }
+            newUser.setConnectionId(event.connection.connectionId);
+            fullData.fullName = capitalize(
+              `${fullData.Name} ${fullData.Surname}`
+              .trim()
+              .replace(/\s\s+/g, ' ')
+              .toLowerCase(),
+              );
+            if (fullData.screenShareActive) {
+              fullData.fullName = `${fullData.fullName} (condivisione)`;
+              newUser.setType('remote-desktop');
+            } else {
+              newUser.setType('remote');
+            }
+            newUser.setFullData(fullData);
+            newUser.setNickname(fullData.fullName);
+            if (fullData.videoActive) {
+              newUser.setVideoActive(true);
+            }
+            if (fullData.audioActive) {
+              newUser.setAudioActive(true);
+            }
+            console.log('[OPENVIDU] NEW USER', newUser, newUser.isVideoActive());
+            subscribers.push(newUser);
+            return this.setState(
+              {
+                subscribers: subscribers,
+              },
+              () => {
+                this.notifyMyStatus();
+              },
+            );
+          }
+        )
     });
     log.log('[OPENVIDU] Preparing streamCreated event');
     session.on('streamCreated', (event) => {
-      log.log('[OPENVIDU] New stream received');
-      const { subscribers } = this.state;
-      const mySubscriber = subscribers.reduce((prev, curr) => {
-        if (prev) return prev;
-        if (curr.getConnectionId() === event.stream.connection.connectionId) {
-          return curr;
+      Promise.delay(500)
+      .then(
+        () => {
+
+          log.log('[OPENVIDU] New stream received');
+          const { subscribers } = this.state;
+          const mySubscriber = subscribers.reduce((prev, curr) => {
+            if (prev) return prev;
+            if (curr.getConnectionId() === event.stream.connection.connectionId) {
+              return curr;
+            }
+            return undefined;
+          }, undefined);
+          if (!mySubscriber) {
+            log.error('[OPENVIDU] Unable to find subscriber on streamCreated!');
+            return;
+          } else {
+            log.log('[OPENVIDU] Stream created for a valid user!');
+          }
+          const myStream = session.subscribe(event.stream, undefined);
+          if (myStream) {
+            mySubscriber.setStreamManager(myStream);
+          }
+          this.setState({
+            subscribers,
+            update: new Date(),
+          });
         }
-        return undefined;
-      }, undefined);
-      if (!mySubscriber) {
-        log.error('[OPENVIDU] Unable to find subscriber on userChanged!');
-        return;
-      } else {
-        log.log('[OPENVIDU] Stream created for a valid user!');
-      }
-      const myStream = session.subscribe(event.stream, undefined);
-      if (myStream) {
-        mySubscriber.setStreamManager(myStream);
-      }
-      this.setState({
-        subscribers,
-        update: new Date(),
-      });
+      )
     });
     log.log('[OPENVIDU] Preparing streamDestroyed event');
     session.on('streamDestroyed', (event) => {
@@ -269,12 +443,17 @@ class NewVerticalVideoChat extends Component {
         }
         return undefined;
       }, undefined);
-      mySubscriber.setStreamManager(null);
-      event.preventDefault();
-      this.setState({
-        subscribers,
-        update: new Date(),
-      });
+      if (mySubscriber) {
+        mySubscriber.setStreamManager(null);
+        event.preventDefault();
+        this.setState({
+          subscribers,
+          update: new Date(),
+        });
+      } else {
+        log.error('[OPENVIDU] Unable to find subscriber on streamDestroyed!');
+        event.preventDefault();
+      }
     });
     log.log('[OPENVIDU] Preparing connectionDestroyed event');
     session.on('connectionDestroyed', (event) => {
@@ -391,7 +570,6 @@ class NewVerticalVideoChat extends Component {
             // 'f889c3483de05701a789b1d57f889a10f814ab18aaede5e15d2d0892ebfd8fd8',
             publishAudio: localUser.isAudioActive(),
             publishVideo: localUser.isVideoActive(),
-            resolution: '640x480',
             frameRate: 30,
             insertMode: 'APPEND',
           });
@@ -464,21 +642,32 @@ class NewVerticalVideoChat extends Component {
   }
 
   render() {
-    const { localUser, session, subscribers, shareSources } = this.state;
+    const { localUser, session, subscribers, shareSources, localDesktopUser } = this.state;
     log.log(
       `[OPENVIDU] Rendering. Session connected? ${localUser.getConnectionId()}`,
     );
     log.log(`[OPENVIDU] Have ${subscribers.length} subscribers`);
     log.log(`[OPENVIDU] Can local user be played?`, localUser.canBePlayed());
-    if (!session) return null;
+    log.log(`[OPENVIDU] Can local desktop user be played?`, localDesktopUser.canBePlayed());
 
+    if (!session) {
+      console.log
+    }
+    if (!session) return null;
+    console.log('[OPENVIDU] Subscribers', subscribers);
+    subscribers.forEach((s, index) => {
+      console.log('[OPENVIDU] Subscriber', index + 1, s, s.videoActive, s.isVideoActive());
+    })
     return (
       <Box
         sx={{
           width: '190px',
         }}
       >
-        {shareSources ? <DesktopChoose shareSources={shareSources} onClose={() => this.setState({ shareSources: null })}/> : null}
+        {shareSources ? <DesktopChoose shareSources={shareSources} setSource={(val) => this.setState({
+          shareSources: null,
+          shareSource: val
+        })} onClose={() => this.setState({ shareSources: null })}/> : null}
         <AppBar position="static">
           <Toolbar variant="dense">
             <Typography
@@ -513,7 +702,15 @@ class NewVerticalVideoChat extends Component {
               user={localUser}
               camStatusChanged={() => this.webcamStatusToggle()}
               micStatusChanged={() => this.micStatusToggle()}
-              screenShare={() => this.screenShare()}
+              screenShare={() => {
+                this.screenShare()
+              }}
+              stopScreenShare={() => {
+                this.setState({
+                  shareSource: null
+                })
+              }}
+              screenSharing={localDesktopUser.isScreenShareActive()}
             />
           </>
         ) : (
@@ -521,6 +718,9 @@ class NewVerticalVideoChat extends Component {
         )}
         {subscribers
           .filter((u) => u.canBePlayed())
+          .sort((a) => {
+            return a.type === 'remote-desktop' ? -1 : 1;
+          })
           .map((user) => {
             console.log('[OPENVIDU] VIDEOUSER', user);
             return (
@@ -540,6 +740,7 @@ class NewVerticalVideoChat extends Component {
         {subscribers
           .filter((u) => !u.canBePlayed())
           .map((user) => {
+            console.log('[OPENVIDU] VIDEOUSER NO!', user);
             return (
               <>
                 <NoVideoComponent
@@ -565,6 +766,20 @@ const mapDispatchToProps = (dispatch) => {
   return {
     setVideoChat: (videoChat) => {
       return setVideoChat(dispatch)(videoChat);
+    },
+    getTokenForSession: (ObjectWithId) => {
+      return doInvoke(
+        'proxy',
+        'chat:gettokenforvideosession',
+        ObjectWithId,
+      )(dispatch)
+        .then((response) => {
+          log.info('Got token for session in channel', ObjectWithId);
+          return response;
+        })
+        .catch((e) => {
+          log.error(e);
+        });
     },
   };
 };
