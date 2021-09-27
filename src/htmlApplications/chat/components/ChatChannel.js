@@ -224,7 +224,7 @@ class ChatChannel extends Component {
       // log.log('[CHAT CHANNEL] Comparing', lastSeen, messageDate, lastSeen < messageDate);
       if (!lastSeen || lastSeen < messageDate) {
         // log.log('[CHAT CHANNEL] Must update last seen for channel', channel.name, 'lastSeen', lastSeen, 'messageDate', messageDate);
-        setChannelLastSeen(channel, messageDate);
+        setImmediate(() => setChannelLastSeen(channel, messageDate));
       } else {
         // log.log('[CHAT CHANNEL] No need to update lastSeen for channel', channel.name, 'lastSeen', lastSeen, 'messageDate', messageDate);
       }

@@ -69,6 +69,13 @@ const mainTheme = createTheme({
         },
       }
     },
+    MuiListItemIcon: {
+      styleOverrides: {
+        root: {
+          minWidth: '30px'
+        }
+      }
+    },
     MuiListItemButton: {
       styleOverrides: {
         root: {
