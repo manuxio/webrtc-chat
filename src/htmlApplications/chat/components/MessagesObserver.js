@@ -167,7 +167,7 @@ class MessagesObserver extends Component {
               onClick: {
                 channel: 'remotelocation:change',
                 arg: {
-                  url: `/chat/${channel._id}`
+                  url: `/chat/channel/${channel._id}`
                 }
               }
             });
