@@ -114,6 +114,7 @@ class Chat extends Component {
                 <GroupCreator />);
           }} />
           <Route exact path="/chat/channel/:channel" render={(routeProps) => {
+              console.log('Router rendering', routeProps.match.params.channel);
               return (
                 <ChatChannel channelId={routeProps.match.params.channel} />);
           }} />

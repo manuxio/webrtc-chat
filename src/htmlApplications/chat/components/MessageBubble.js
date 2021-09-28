@@ -11,8 +11,8 @@ import Reply from '@material-ui/icons/Reply';
 import MoreHoriz from '@material-ui/icons/MoreHoriz';
 import { format } from 'date-fns';
 import { convert } from 'html-to-text';
+// import memoizee from 'memoizee';
 // import Promise from 'bluebird';
-
 
 const useStyles = makeStyles(({ palette, spacing/*, measure */ }) => {
   const radius = spacing(2.5);

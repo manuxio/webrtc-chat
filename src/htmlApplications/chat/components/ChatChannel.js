@@ -18,6 +18,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import memoizee from 'memoizee';
 import { setVisible, setLastSeen } from '../actions/channels';
 import {
   loadBulkMessagesByChannelId,
@@ -49,6 +50,30 @@ import showdown from 'showdown';
 const converter = new showdown.Converter();
 // import ResizeDetector from './ResizeDetector';
 import '../styles/ChatChannel.css';
+
+function logUpdatedDiff(prev, current) {
+  const now = Object.entries(current);
+  const added = now.filter(([key, val]) => {
+    if (prev[key] === undefined) return true;
+    if (prev[key] !== val) {
+      console.log(
+        `${key}
+        %c- ${JSON.stringify(prev[key])}
+        %c+ ${JSON.stringify(val)}`,
+        "color:red;",
+        "color:green;"
+      );
+    }
+    return false;
+  });
+  added.forEach(([key, val]) =>
+    console.log(
+      `${key}
+        %c+ ${JSON.stringify(val)}`,
+      "color:green;"
+    )
+  );
+}
 
 // const md = new MarkdownIt({
 //   breaks: true
@@ -122,11 +147,12 @@ const mapDispatchToProps = (dispatch) => {
 class ChatChannel extends Component {
   constructor(props) {
     super(props);
+    this.memoizedMakeBubbles = memoizee(this.makeBubbles, { max: 2, length: 2 })
     this.state = {
       editorHeight: 86,
       editorValue: '',
       isFullScrolled: false,
-      videoSessionToken: undefined
+      videoSessionToken: undefined,
     };
   }
 
@@ -140,6 +166,7 @@ class ChatChannel extends Component {
     // const {
     //   isVisible
     // } = channel;
+    this.prevChannelId = this.props.channel._id;
     if (!messages) {
       return;
     }
@@ -160,7 +187,10 @@ class ChatChannel extends Component {
   }
 
   componentDidUpdate(prevProps) {
+    logUpdatedDiff(prevProps, this.props);
+    this.prevChannelId = this.props.channel._id;
     const { channel, setChannelVisible, messages } = this.props;
+    console.log('ChatChannel update', channel._id, (new Date()).getTime());
 
     const isSameChannel = prevProps.channel._id === this.props.channel._id;
     const gotNewMessage =
@@ -169,24 +199,26 @@ class ChatChannel extends Component {
       messages.length > 0 &&
       prevProps.messages?.length < messages.length;
     if (!isSameChannel) {
-      log.silly('Scrolling, because channel is different');
+      console.log('Scrolling, because channel is different', (new Date()).getTime());
       this.scrollBars.scrollToBottom();
+      setChannelVisible(channel._id);
       this.setState({
         videoSessionToken: null
-      })
+      });
     } else {
       if (gotNewMessage && this.state.isFullScrolled) {
-        log.silly('Scrolling, because got at least one new message');
+        console.log('Scrolling, because got at least one new message');
         this.scrollBars.scrollToBottom();
       }
     }
 
-    if (!isSameChannel) {
-      log.silly('Setting new channel as visible');
-      setChannelVisible(channel._id);
-    }
+    // if (!isSameChannel) {
+    //   setTimeout(() => {
+    //     setChannelVisible(channel._id);
+    //     console.log('Setting new channel as visible');
+    //   }, 1);
+    // }
     this.updateLastSeenIfNeeded();
-
     // console.log('Not scrolling', this.scrollBars.getScrollTop());
   }
   getUserFullNameById(uid) {
@@ -231,8 +263,11 @@ class ChatChannel extends Component {
     }
   }
 
-  makeBubbles() {
-    const { messages, user } = this.props;
+  makeBubbles(messagesAsString, userAsString) {
+    console.log('ARGS', userAsString);
+    const messages = JSON.parse(messagesAsString);
+    const user = JSON.parse(userAsString);
+    // const { messages, user } = this.props;
     if (!user || !messages) {
       return null;
     }
@@ -331,6 +366,7 @@ class ChatChannel extends Component {
       channel,
       messages,
       t,
+      user
       // messages
     } = this.props;
     const {
@@ -345,6 +381,19 @@ class ChatChannel extends Component {
             .map((uid) => `@${this.getUserFullNameById(uid)}`)
             .join(' ')}`;
     const videoSessionId = channel.videoSessionId || false;
+    const s = (new Date()).getTime();
+    console.log('Making bubbles for channel', channelName, (new Date()).getTime(), user);
+    let msgsToRender = "null";
+    if (this.prevChannelId === channel._id) {
+      msgsToRender = messages ? JSON.stringify(messages) : "null";
+      console.log('Same channel!');
+    } else {
+      msgsToRender = messages ? JSON.stringify(messages) : "null";
+      console.log('Different channel!');
+    }
+    const bubbles = this.memoizedMakeBubbles(msgsToRender, user ? JSON.stringify(user) : 'null');
+    const e = (new Date()).getTime();
+    console.log('Made bubbles', channelName, (new Date()).getTime(), e-s);
     return (
       <>
         <Box p={0} style={{ height: '100vh', overflowY: 'auto' }}>
@@ -444,7 +493,7 @@ class ChatChannel extends Component {
                   }
                 }}
               >
-                {this.makeBubbles()}
+                {bubbles}
               </Scrollbars>
             </div>
             <Box
