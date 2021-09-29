@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import cx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
 import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
@@ -11,10 +12,12 @@ import Reply from '@material-ui/icons/Reply';
 import MoreHoriz from '@material-ui/icons/MoreHoriz';
 import { format } from 'date-fns';
 import { convert } from 'html-to-text';
+import { styled } from '@material-ui/core/styles';
+
 // import memoizee from 'memoizee';
 // import Promise from 'bluebird';
 
-const useStyles = makeStyles(({ palette, spacing/*, measure */ }) => {
+const useStyles = makeStyles(({ palette, spacing /*, measure */ }) => {
   const radius = spacing(2.5);
   const size = 30;
   const leftBgColor = palette.primary.dark;
@@ -58,7 +61,7 @@ const useStyles = makeStyles(({ palette, spacing/*, measure */ }) => {
       borderTopRightRadius: radius,
       borderBottomRightRadius: radius,
       backgroundColor: leftBgColor,
-      minWidth: '200px'
+      minWidth: '200px',
     },
     right: {
       borderTopLeftRadius: radius,
@@ -69,8 +72,8 @@ const useStyles = makeStyles(({ palette, spacing/*, measure */ }) => {
       minWidth: '200px',
       '&author': {
         color: palette.text.disabled,
-        display: 'none'
-      }
+        display: 'none',
+      },
     },
     leftFirst: {
       borderTopLeftRadius: radius,
@@ -85,22 +88,22 @@ const useStyles = makeStyles(({ palette, spacing/*, measure */ }) => {
       borderBottomRightRadius: radius,
     },
     author: {
-      color: palette.text.disabled
+      color: palette.text.disabled,
     },
     date: {
       color: palette.text.disabled,
       textAlign: 'right',
-      fontSize: '80%'
+      fontSize: '80%',
     },
     fromMarkdown: {
       '& P': {
-        "margin": "0px"
+        margin: '0px',
       },
       '& blockquote': {
         borderLeft: '2px solid #ff6a00',
-        margin: "7px 2px 7px 2px",
-        paddingLeft: "4px",
-        textAlign: "left"
+        margin: '7px 2px 7px 2px',
+        paddingLeft: '4px',
+        textAlign: 'left',
       },
     },
     iconBtn: {
@@ -122,9 +125,17 @@ const useStyles = makeStyles(({ palette, spacing/*, measure */ }) => {
   };
 });
 
-const MessageBubble = ({ from, avatar, messages, side, dates, ids, onReply }) => {
+const MessageBubble = ({
+  from,
+  avatar,
+  messages,
+  side,
+  dates,
+  ids,
+  onReply,
+}) => {
   const styles = useStyles();
-  const attachClass = index => {
+  const attachClass = (index) => {
     if (index === 0) {
       return styles[`${side}First`];
     }
@@ -159,23 +170,33 @@ const MessageBubble = ({ from, avatar, messages, side, dates, ids, onReply }) =>
                     align={'left'}
                     className={cx(styles.msg, styles[side], attachClass(i))}
                   >
-                    {
-                      i === 0
-                      ? <div className={cx(styles.author)}>{name}</div>
-                      : null
-                    }
-                    <div className={cx(styles.fromMarkdown)} dangerouslySetInnerHTML={{__html: msg }} />
-                    <div className={cx(styles.date)}>{`${format(new Date(dates[i]), 'Pp')}`}</div>
+                    {i === 0 ? (
+                      <div className={cx(styles.author)}>{name}</div>
+                    ) : null}
+                    <div
+                      className={cx(styles.fromMarkdown)}
+                      dangerouslySetInnerHTML={{ __html: msg }}
+                    />
+                    <div className={cx(styles.date)}>{`${format(
+                      new Date(dates[i]),
+                      'Pp',
+                    )}`}</div>
                   </Typography>
                 )}
                 {typeof msg === 'object' && msg.type === 'image' && (
                   <img className={styles.image} alt={msg.alt} {...msg} />
                 )}
-                <IconButton className={styles.iconBtn} onClick={() => {
-                  if (onReply) {
-                    onReply({ msgid: ids[i], textversion: convert(msg) || ""});
-                  }
-                }}>
+                <IconButton
+                  className={styles.iconBtn}
+                  onClick={() => {
+                    if (onReply) {
+                      onReply({
+                        msgid: ids[i],
+                        textversion: convert(msg) || '',
+                      });
+                    }
+                  }}
+                >
                   <Reply />
                 </IconButton>
                 <IconButton className={styles.iconBtn}>
@@ -201,10 +222,56 @@ MessageBubble.defaultProps = {
   side: 'left',
 };
 
+const Item = styled(Paper)(({ theme }) => ({
+  ...theme.typography.body2,
+  padding: theme.spacing(1),
+  textAlign: 'center',
+  color: theme.palette.text.secondary,
+  marginBottom: '2px'
+}));
+
+const StupidBubble = ({
+  from,
+  avatar,
+  messages,
+  side,
+  dates,
+  ids,
+  onReply,
+}) => {
+  const name = `${from.Name} ${from.Surname}`;
+  return (
+    <Grid
+      container
+      spacing={2}
+      justifyContent={side === 'right' ? 'flex-end' : 'flex-start'}
+    >
+      <Grid item xs="8" sx={{
+        marginTop: '5px'
+      }}>
+        {messages.map((msg, i) => {
+          return (
+            <Item key={msg._id}>
+              {i === 0 ? (
+                      <div >{name}</div>
+                    ) : null}
+                    <div dangerouslySetInnerHTML={{ __html: msg }} />
+                    <div>{`${format(
+                      new Date(dates[i]),
+                      'Pp',
+                    )}`}</div>
+              </Item>
+            );
+        })}
+      </Grid>
+    </Grid>
+  );
+};
+
 export default function SuspendedMessageBubble(props) {
   return (
     <Suspense fallback="Please wait">
-      <MessageBubble {...props} />
+      <StupidBubble {...props} />
     </Suspense>
   );
 }
