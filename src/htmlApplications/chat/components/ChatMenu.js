@@ -12,6 +12,7 @@ import List from '@material-ui/core/List';
 import ListItemButton from '@material-ui/core/ListItemButton';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import Tooltip from '@material-ui/core/Tooltip';
 import TagIcon from '@material-ui/icons/Tag';
 import AddIcon from '@material-ui/icons/Add';
 import Input from '@material-ui/core/Input';
@@ -78,6 +79,13 @@ const mainTheme = createTheme({
           '&.Mui-selected:hover': {
             backgroundColor: '#42423fad'
           }
+        }
+      }
+    },
+    MuiListItemIcon: {
+      styleOverrides: {
+        root: {
+          minWidth: '40px'
         }
       }
     },
@@ -212,27 +220,29 @@ class MyChatMenu extends Component {
       const chanAlert =
         alerts && alerts.byChannel ? alerts.byChannel[c._id] : {};
       return (
-        <ListItemButton
-          dense
-          key={c._id}
-          selected={c.isVisible}
-          onClick={() => {
-            // console.log('location', location);
-            if (location.pathname !== `/chat/channel/${c._id}`) {
-              history.push(`/chat/channel/${c._id}`);
-            }
-          }}
-        >
-          <ListItemIcon>
-            <Badge
-              badgeContent={chanAlert?.unseenMessages || null}
-              color={chanAlert?.unseenMentions > 0 ? 'secondary' : 'primary'}
-            >
-              <TagIcon />
-            </Badge>
-          </ListItemIcon>
-          <ListItemText primary={c.name} />
-        </ListItemButton>
+        <Tooltip title={c.name} placement="right">
+          <ListItemButton
+            dense
+            key={c._id}
+            selected={c.isVisible}
+            onClick={() => {
+              // console.log('location', location);
+              if (location.pathname !== `/chat/channel/${c._id}`) {
+                history.push(`/chat/channel/${c._id}`);
+              }
+            }}
+          >
+            <ListItemIcon>
+              <Badge
+                badgeContent={chanAlert?.unseenMessages || null}
+                color={chanAlert?.unseenMentions > 0 ? 'secondary' : 'primary'}
+              >
+                <TagIcon />
+              </Badge>
+            </ListItemIcon>
+            <ListItemText primary={c.name} />
+          </ListItemButton>
+        </Tooltip>
       );
     });
     return (
@@ -250,11 +260,19 @@ class MyChatMenu extends Component {
     const { history, location, alerts, createPrivateChannel, me } = this.props;
     const subElements = usersToShow.map(({ user, channel }) => {
       // console.log('USER', user.Name, channel);
+      const capitalizedUser =  capitalize(
+        `${user.Name} ${user.Surname}`
+          .trim()
+          .replace(/\s\s+/g, ' ')
+          .toLowerCase(),
+      );
       const chanAlert =
         channel && alerts && alerts.byChannel
           ? alerts.byChannel[channel._id]
           : {};
       return (
+      <Tooltip title={capitalizedUser}
+      placement="right">
         <ListItemButton
           dense
           selected={channel?.isVisible}
@@ -300,15 +318,11 @@ class MyChatMenu extends Component {
             </Badge>
           </ListItemIcon>
           <ListItemText
-            primary={capitalize(
-              `${user.Name} ${user.Surname}`
-                .trim()
-                .replace(/\s\s+/g, ' ')
-                .toLowerCase(),
-            )}
+            primary={capitalizedUser}
             primaryTypographyProps={{ noWrap: true }}
           />
         </ListItemButton>
+      </Tooltip>
       );
     });
     return (

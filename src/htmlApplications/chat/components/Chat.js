@@ -87,7 +87,7 @@ class Chat extends Component {
           component="nav"
           className={"maximumHeight"}
           sx={{
-            width: 250,
+            width: 192,
             backgroundColor: '#1e272c',
             paddingTop: '0px',
             borderRight: '1px solid #333f44',
@@ -132,4 +132,3 @@ export default function App() {
     </Suspense>
   );
 }
-
