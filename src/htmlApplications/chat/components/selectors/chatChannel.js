@@ -12,7 +12,10 @@ const getAllMessages = (state) => {
 
 const getAllMessagesAsString = (state) => {
   // console.log('MMMM', state.messages);
-  return JSON.stringify(state.messages.messages);
+  console.log('getAllMessagesAsString start', (new Date()).getTime());
+  const retval = JSON.stringify(state.messages.messages);
+  console.log('getAllMessagesAsString completed', (new Date()).getTime());
+  return retval;
 };
 
 // const getAllMessagesAsString = (state) => {
@@ -87,7 +90,10 @@ export const getMessagesAsString = createSelector(
   (channelId, messagesByChannelAsString) => {
     // console.log('Executing out getMessages function');
     // console.log('EXXXX', messagesByChannel);
-    return JSON.stringify(JSON.parse(messagesByChannelAsString)[channelId]);
+    console.log('getMessagesAsString started', channelId, (new Date()).getTime());
+    const retval = JSON.stringify(JSON.parse(messagesByChannelAsString)[channelId]);
+    console.log('getMessagesAsString completed', channelId, (new Date()).getTime());
+    return retval;
     // return messages.filter((m) => m.channel === channelId);
   }
 );
@@ -104,8 +110,10 @@ export const getMessages = createSelector(
   (messages = "[]" ) => {
     // console.log('Executing out getMessages function');
     // console.log('EXXXX', typeof messages, messages);
-    console.log('Editor Enter getMessages completed', (new Date()).getTime());
-    return JSON.parse(messages);
+    console.log('getMessages started', (new Date()).getTime());
+    const retval = JSON.parse(messages);
+    console.log('getMessages completed', (new Date()).getTime());
+    return retval;
     // return messages.filter((m) => m.channel === channelId);
   }
 );
@@ -120,7 +128,7 @@ export const getMe = createSelector(
 export const getChannel = createSelector(
   [ getChannelId, getAllChannelsWithoutPropsAsString(['isVisible']) ],
   (channelId, channels = "[]") => {
-    console.log('Executing out getChannel function', channels, JSON.parse(channels));
+    // console.log('Executing out getChannel function', channels, JSON.parse(channels));
     return JSON.parse(channels).reduce((prev, curr) => {
       if (curr._id === channelId) return curr;
       return prev;

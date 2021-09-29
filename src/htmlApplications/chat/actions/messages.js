@@ -1,6 +1,6 @@
 import { doInvoke } from './ipcRequest';
 import { ObjectID } from 'bson';
-// import Promise from 'bluebird';
+import Promise from 'bluebird';
 
 import {
   MESSAGES_BULK_LOAD,
@@ -47,7 +47,10 @@ export const sendMessageAction = (dispatch) => {
     log.info('New Message', newMessage, newMessageAction(newMessage));
     console.log('Editor Enter New Message Action Time', (new Date()).getTime());
     dispatch(newMessageAction(newMessage));
-    return doInvoke('messages:sendto:request', newMessage)(dispatch)
+    return Promise.delay(1)
+      .then(
+        () => doInvoke('messages:sendto:request', newMessage)(dispatch)
+      )
       .then(
         (result) => {
           if (!result || result.error) {
