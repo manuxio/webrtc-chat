@@ -8,7 +8,7 @@ const startAfterAuthentication = false;
 const canAuthenticate = false;
 const browserOptions = {
   width: 1400,
-  height: 700,
+  height: 865,
   minWidth: 1024,
   minHeight: 768,
   devTools: isDev ? true : false
