@@ -271,7 +271,7 @@ const StupidBubble = ({
 export default function SuspendedMessageBubble(props) {
   return (
     <Suspense fallback="Please wait">
-      <StupidBubble {...props} />
+      <MessageBubble {...props} />
     </Suspense>
   );
 }
