@@ -568,10 +568,10 @@ class ChatChannel extends Component {
               justifyContent: 'flex-start',
               alignContent: 'stretch',
               alignItems: 'stretch',
-              height: '100%',
+              height: '100vh',
             }}
           >
-            <AppBar position="static">
+            <AppBar position="static" sx={{ height: '48px', flex: 'none'}}>
               <Toolbar variant="dense">
                 <Typography
                   variant="h6"
@@ -668,8 +668,9 @@ class ChatChannel extends Component {
             <Box
               sx={{
                 order: 0,
-                flex: '0 1 auto',
+                flex: 'none',
                 backgroundColor: 'palette.main',
+                maxHeight: '90px'
               }}
             >
               <ChatEditor
