@@ -20,7 +20,11 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import memoizee from 'memoizee';
-import { setVisible, setLastSeen } from '../actions/channels';
+import {
+  setVisible,
+  setLastSeen
+} from '../actions/newChannels';
+// import { setLastSeen } from '../actions/channels';
 import {
   loadBulkMessagesByChannelId,
   sendMessageAction,
@@ -169,6 +173,7 @@ class ChatChannel extends Component {
   constructor(props) {
     super(props);
     this.myList = React.createRef();
+    this.editorContainer = React.createRef();
     this.memoizedMakeBubbles = memoizee(this.makeBubbles, {
       max: 2,
       length: 2,
@@ -220,6 +225,19 @@ class ChatChannel extends Component {
     }
     this.updateLastSeenIfNeeded();
     setChannelVisible(channel._id);
+    if (this.editorContainer.current) {
+      console.log('Attaching event!');
+      this.resObserver = new ResizeObserver((e) => {
+        console.log('Editor resized!', e);
+        const [rect] = e;
+        this.setState({
+          editorHeight: rect.contentRect.height
+        })
+      }).observe(this.editorContainer.current);
+      // this.editorContainer.current.addEventListener('resize', (e) => {
+      //   console.log('Editor resized!', e.target);
+      // });
+    }
   }
 
   componentWillUnmount() {
@@ -256,10 +274,10 @@ class ChatChannel extends Component {
           this.myList.current.scrollToRow(lastMessage.cnt - 1);
         }, 2);
       }
-      setChannelVisible(channel._id);
       this.setState({
         videoSessionToken: null,
       });
+      setChannelVisible(this.props.channel._id);
     } else {
       if (gotNewMessage && this.state.isFullScrolled) {
         console.log('Scrolling, because got at least one new message');
@@ -296,6 +314,7 @@ class ChatChannel extends Component {
     return null;
   }
   updateLastSeenIfNeeded() {
+    // console.log('OK1');
     const { messages, channel, setChannelLastSeen, isAppFocused } = this.props;
     if (!isAppFocused) {
       // log.log('Chat is not focused!');
@@ -311,7 +330,7 @@ class ChatChannel extends Component {
       // log.log('[CHAT CHANNEL] Comparing', lastSeen, messageDate, lastSeen < messageDate);
       if (!lastSeen || lastSeen < messageDate) {
         // log.log('[CHAT CHANNEL] Must update last seen for channel', channel.name, 'lastSeen', lastSeen, 'messageDate', messageDate);
-        setImmediate(() => setChannelLastSeen(channel, messageDate));
+        setImmediate(() => setChannelLastSeen(channel._id, messageDate));
       } else {
         // log.log('[CHAT CHANNEL] No need to update lastSeen for channel', channel.name, 'lastSeen', lastSeen, 'messageDate', messageDate);
       }
@@ -634,6 +653,7 @@ class ChatChannel extends Component {
               <>
                 {messages.length ? (
                   <ChatBox
+                    boxHeight={`calc(100vh - ${this.state.editorHeight}px - 63px)`}
                     onScrollTop={() => {
                       // console.log('ChatChannel Scroll Top');
                       this.props.loadPrevMessages({
@@ -643,10 +663,12 @@ class ChatChannel extends Component {
                     }}
                     onScrollBottom={() => {
                       // console.log('ChatChannel Scroll Bottom');
-                      this.props.loadNextMessages({
-                        channelId: channel._id,
-                        start: messages.length > 0 ? messages[messages.length - 1]._id : null
-                      });
+                      if (!channel.isEnd) {
+                        this.props.loadNextMessages({
+                          channelId: channel._id,
+                          start: messages.length > 0 ? messages[messages.length - 1]._id : null
+                        });
+                      }
                     }}
                     owner={user}
                     ownerAvatar={user.avatar}
@@ -666,11 +688,12 @@ class ChatChannel extends Component {
               </>
             </div>
             <Box
+              ref={this.editorContainer}
               sx={{
                 order: 0,
-                flex: 'none',
+                flex: '0 1 auto',
                 backgroundColor: 'palette.main',
-                maxHeight: '90px'
+                // maxHeight: '90px'
               }}
             >
               <ChatEditor

@@ -27,8 +27,10 @@ class ChatBox extends React.Component {
       onScrollTop,
       onScrollBottom
     } = this.props;
+    console.log('this.props.boxHeight', this.props.boxHeight);
 		return (
-			<div className={"chatApp__conv"}>
+			<div className={"chatApp__conv"} style={{
+        height: this.props.boxHeight}}>
 				<MessageList
           onScrollTop={onScrollTop}
           onScrollBottom={onScrollBottom}

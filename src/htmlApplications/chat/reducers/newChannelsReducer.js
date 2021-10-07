@@ -8,15 +8,124 @@ import {
   CHANNEL_PREPEND_MESSAGES,
   CHANNEL_APPENDING_MESSAGES,
   CHANNEL_APPEND_MESSAGES,
-  CHANNEL_MESSAGE_NEW_LOCAL
+  CHANNEL_MESSAGE_NEW_LOCAL,
+  CHANNEL_SET_VISIBLE,
+  CHANNELS_SET_LASTSEEN,
+  CHANNEL_MESSAGE_UPDATE_ONE,
+  CHANNEL_MESSAGE_NEW_REMOTE
 } from '../actiontypes/newChannels';
+
+const MAX_MESSAGES = 100;
 
 export const initialState = {};
 
 export default function newChannelsReducer (state = initialState, action, prevState, nextState) {
   switch(action.type) {
+    case CHANNEL_MESSAGE_NEW_REMOTE: {
+      // console.log('NEW MESSAGE', action);
+      /*
+      {
+        channel: "612778827782b80e77413cb2"
+        date: "2021-10-07T14:06:27.071Z"
+        from: {_id: "5ec3cf8695105bbd41dcfe64", IDUtente: 4317, userId: 4317, username: "manu", Name: "Manuele", …}
+        mentions: []
+        message: "PROVA"
+        _id: "615efee3f7f1a97fb4adb6e2"
+      }
+      */
+      // console.log('STATE', state, action);
+      // return state;
+      const {
+        channel: channelId,
+        ...newMessage
+      } = action.payload;
+      console.log('CHANNEL', channelId, 'NEW MESSAGE', newMessage);
+      const channels = state.channels.map((c) => Object.assign({}, c)).map((c) => {
+        if (c._id === channelId) {
+          console.log('DEBUG C', typeof c.messages, Array.isArray(c.messages));
+          const messages = c.messages.map((m) => Object.assign({}, m));
+          messages.push(newMessage);
+          c.messages = messages;
+          return c;
+          // return {
+          //   ...c,
+          //   messages
+          // };
+        }
+        return c;
+      });
+      console.log('channels', channels);
+      return {
+        ...state,
+        channels
+      };
+
+    }
+    case CHANNEL_MESSAGE_UPDATE_ONE: {
+      const {
+        channelId,
+        oldMessageId,
+        newProps
+      } = action.payload;
+      const channels = state.channels.map((c) => Object.assign({}, c)).map((c) => {
+        if (c._id === channelId) {
+          const messages = c.messages.map((m) => Object.assign({}, m)).map((msg) => {
+            if (msg._id === oldMessageId) {
+              return Object.assign({}, msg, newProps);
+            }
+            return msg;
+          });
+          return {
+            ...c,
+            messages
+          };
+        }
+        return c;
+      });
+
+      return {
+        channels
+      }
+    }
+    case CHANNEL_SET_VISIBLE: {
+      const { channelId, visible } = action.payload;
+
+      const channels = state.channels.map((c) => Object.assign({}, c)).map((c) => {
+        if (c._id === channelId) {
+          c.visible = visible;
+        } else {
+          c.visible = false;
+          // console.log('Should slice', c);
+          if (c.messages.length > MAX_MESSAGES) {
+            console.log('Slicing messages for chan', c);
+            c.messages = c.messages.slice(-MAX_MESSAGES);
+          }
+        }
+        return c;
+      });
+
+      return {
+        channels
+      }
+    }
+
+    case CHANNELS_SET_LASTSEEN: {
+      const { channelId, lastSeen } = action.payload;
+
+      const channels = state.channels.map((c) => Object.assign({}, c)).map((c) => {
+        if (c._id === channelId) {
+          c.lastSeen = lastSeen;
+        }
+        return c;
+      });
+
+      return {
+        channels
+      }
+    }
+
     case CHANNELS_FULL_UPDATE: {
-      console.log('action data', action);
+      // console.log('action data', action);
       const { channels } = action.payload;
       return {
         channels
@@ -92,7 +201,7 @@ export default function newChannelsReducer (state = initialState, action, prevSt
         if (c._id === channelId) {
           return Object.assign({}, c, {
             loadingNext: false,
-            messages: c.messages.concat(messages).slice(-100),
+            messages: c.messages.concat(messages).slice(-MAX_MESSAGES),
             // messages: c.messages.concat(messages),
             isEnd,
             isStart

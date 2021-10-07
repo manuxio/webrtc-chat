@@ -7,7 +7,9 @@ import {
   CHANNEL_APPENDING_MESSAGES,
   CHANNEL_APPEND_MESSAGES,
   CHANNEL_MESSAGE_NEW_LOCAL,
-  CHANNEL_MESSAGE_UPDATE_ONE
+  CHANNEL_MESSAGE_UPDATE_ONE,
+  CHANNEL_SET_VISIBLE,
+  CHANNELS_SET_LASTSEEN
 } from '../actiontypes/newChannels';
 
 export const loadChannels = (dispatch) => (options) =>
@@ -99,21 +101,53 @@ export const sendMessage = (dispatch) => (channel, messageObject, from) => {
       }
     )
     .then(
-      (result) => {
+      (newProps) => {
         // console.log('Got send message result', result);
-        if (result) {
+        if (newProps) {
           const newUpdateAction = makeDataAction(
             CHANNEL_MESSAGE_UPDATE_ONE,
+            '',
             {
               channelId: newMessage.channel,
               oldMessageId: newMessage._id,
-              result
+              newProps
             }
           );
           return dispatch(newUpdateAction);
         }
       }
     )
+}
+
+export const setVisible = (dispatch) => (channelId, visible = true) => {
+  Promise.resolve()
+    .then(() => {
+      const setVisibleAction = makeDataAction(
+        CHANNEL_SET_VISIBLE,
+        '',
+        { channelId, visible }
+      );
+      console.log('setVisibleAction', setVisibleAction);
+      return dispatch(setVisibleAction);
+    })
+}
+
+export const setLastSeen = (dispatch) => (channelId, lastSeen = new Date()) => {
+  Promise.resolve()
+    .then(() => {
+      const setLastSeenAction = makeDataAction(
+        CHANNELS_SET_LASTSEEN,
+        '',
+        {channelId, lastSeen},
+      );
+      return dispatch(setLastSeenAction);
+    })
+    .then(() =>
+      makeProxyRequest('chat:setchannellastseen')(dispatch)({channelId, lastSeen}),
+    )
+    .then((results) => {
+      return results;
+    });
 }
 
 const makeDataAction = (type, dataName, data) => {
