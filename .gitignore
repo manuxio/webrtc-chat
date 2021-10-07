@@ -25,6 +25,9 @@ build/app/dist
 build/release
 .erb/dll
 
+build/app/.yarn
+.yarn/
+
 .idea
 npm-debug.log.*
 *.css.d.ts
