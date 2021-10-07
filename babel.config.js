@@ -24,7 +24,7 @@ module.exports = (api) => {
       ['@babel/preset-react', {
         runtime: 'automatic',
         development: development,
-        importSource: '@welldone-software/why-did-you-render',
+        // importSource: '@welldone-software/why-did-you-render',
       }]
     ],
     plugins: [

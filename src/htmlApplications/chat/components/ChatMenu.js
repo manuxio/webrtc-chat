@@ -30,10 +30,12 @@ import log from 'electron-log';
 
 // import { Link } from 'react-router-dom';
 import {
-  getUserChannels,
-  getGroupChannels,
   getMe,
 } from './selectors/chatChannel';
+import {
+  getUserChannels,
+  getGroupChannels,
+} from './selectors/newChatChannel';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import { Scrollbars } from 'react-custom-scrollbars-2';
 /*

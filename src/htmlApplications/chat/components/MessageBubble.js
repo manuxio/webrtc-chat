@@ -89,6 +89,7 @@ const useStyles = makeStyles(({ palette, spacing /*, measure */ }) => {
     },
     author: {
       color: palette.text.disabled,
+      fontWeight: 'bold'
     },
     date: {
       color: palette.text.disabled,
@@ -150,6 +151,7 @@ const MessageBubble = ({
       container
       spacing={2}
       justify={side === 'right' ? 'flex-end' : 'flex-start'}
+      style={{ overflowAnchor: 'initial' }}
     >
       {side === 'left' && (
         <Grid item>

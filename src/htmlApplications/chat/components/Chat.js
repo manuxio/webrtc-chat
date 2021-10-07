@@ -91,7 +91,8 @@ class Chat extends Component {
             backgroundColor: '#1e272c',
             paddingTop: '0px',
             borderRight: '1px solid #333f44',
-            overflow: 'auto'
+            overflow: 'auto',
+            flex: 'none'
           }}
         >
           <ChatMenu/>
@@ -114,7 +115,7 @@ class Chat extends Component {
                 <GroupCreator />);
           }} />
           <Route exact path="/chat/channel/:channel" render={(routeProps) => {
-              console.log('Router rendering', routeProps.match.params.channel);
+              // console.log('Router rendering', routeProps.match.params.channel);
               return (
                 <ChatChannel channelId={routeProps.match.params.channel} />);
           }} />

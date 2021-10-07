@@ -7,10 +7,10 @@ import {
 const log = require('electron-log');
 
 export const loadUsers = (dispatch) => () => {
-  log.info('Loading users');
+  // log.info('Loading users');
   doInvoke('proxy', 'chat:getallusers', {})(dispatch).then(
     (response) => {
-      log.info('Got users reply in a promise', response);
+      log.info('Got users reply in a promise, with length', response.length);
       if (response) {
         setUsers(dispatch)(response);
       }

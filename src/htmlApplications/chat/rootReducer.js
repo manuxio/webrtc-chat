@@ -3,6 +3,10 @@ import { combineReducers } from 'redux';
 
 import combineReducersWithFullState from './libs/combineReducersWithFullState';
 
+import {
+  NEW_CHANNELS_NAME
+} from './libs/constants';
+
 import todo from './reducers/todo';
 import ping from './reducers/ping';
 import appConfig from './reducers/appConfig';
@@ -14,6 +18,7 @@ import messages from './reducers/messages';
 import alerts from './reducers/alerts';
 import users from './reducers/users';
 import videoChat from './reducers/videoChat';
+import newChannelsReducer from './reducers/newChannelsReducer';
 // Use ES6 object literal shorthand syntax to define the object shape
 
 const makeDummyReducer = (defState) => (state) => {
@@ -35,7 +40,8 @@ const mainReducers = combineReducers({
   messages: makeDummyReducer({ messages: {}}),
   users: makeDummyReducer({ users: {}}),
   channels: makeDummyReducer({ channels: undefined }),
-  alerts: makeDummyReducer({})
+  alerts: makeDummyReducer({}),
+  [NEW_CHANNELS_NAME]: makeDummyReducer({}),
 });
 
 const specialReducers = combineReducersWithFullState({
@@ -49,7 +55,8 @@ const specialReducers = combineReducersWithFullState({
   channels,
   users,
   messages,
-  alerts
+  alerts,
+  [NEW_CHANNELS_NAME]: newChannelsReducer
 });
 
 const rootReducer = (state, action) => {

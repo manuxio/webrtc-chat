@@ -7,6 +7,10 @@ import {
 // import Promise from 'bluebird';
 
 import { ipcRenderer } from 'electron';
+import Promise from 'bluebird';
+Promise.config({
+	cancellation: true
+});
 let requestCnt = 0;
 
 export const doInvoke = (...originalArgs) => {
@@ -25,16 +29,24 @@ export const doInvoke = (...originalArgs) => {
     requestCnt++;
     const requestId = `REQ_${requestCnt}`;
     dispatch(ipcRequestStarted(request, requestId, arg));
-    return ipcRenderer.invoke(request, ...arg)
+    return Promise.resolve().timeout(250)
+      .then(
+        () => {
+          // console.log('Requesting', request, arg);
+          return ipcRenderer.invoke(request, ...arg);
+        }
+      )
+      .timeout(1000)
       .then(
         (response) => {
+          // console.log('response', request, arg, response);
           dispatch(ipcRequestSuccess(request, requestId, response));
           return response;
         }
       )
       .then(
         (response) => {
-          console.log('IPC RESPONSE', response);
+          // console.log('IPC RESPONSE', response);
           if (response && response.error) {
             throw new Error(response.error);
           }
@@ -47,11 +59,13 @@ export const doInvoke = (...originalArgs) => {
       )
       .catch(
         (e) => {
+          // console.log('AM I HERE?');
           // console.error(e);
           dispatch(ipcRequestFailure(request, requestId, e.message.replace(`Error invoking remote method 'login:request': Error: `, '')))
           if (callback && typeof callback === 'function') {
-            callback(new Error(e.message.replace(`Error invoking remote method 'login:request': Error: `, '')), request, requestId);
+            return callback(new Error(e.message.replace(`Error invoking remote method 'login:request': Error: `, '')), request, requestId);
           }
+          throw new Error(`Request ${arg[0]} failed: ${e.message}`);
         }
       );
     // console.log('Sending requestid', requestId, 'with name', request);

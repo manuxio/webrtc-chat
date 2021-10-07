@@ -12,9 +12,9 @@ const getAllMessages = (state) => {
 
 const getAllMessagesAsString = (state) => {
   // console.log('MMMM', state.messages);
-  console.log('getAllMessagesAsString start', (new Date()).getTime());
+  // console.log('getAllMessagesAsString start', (new Date()).getTime());
   const retval = JSON.stringify(state.messages.messages);
-  console.log('getAllMessagesAsString completed', (new Date()).getTime());
+  // console.log('getAllMessagesAsString completed', (new Date()).getTime());
   return retval;
 };
 
@@ -90,9 +90,9 @@ export const getMessagesAsString = createSelector(
   (channelId, messagesByChannelAsString) => {
     // console.log('Executing out getMessages function');
     // console.log('EXXXX', messagesByChannel);
-    console.log('getMessagesAsString started', channelId, (new Date()).getTime());
+    // console.log('getMessagesAsString started', channelId, (new Date()).getTime());
     const retval = JSON.stringify(JSON.parse(messagesByChannelAsString)[channelId]);
-    console.log('getMessagesAsString completed', channelId, (new Date()).getTime());
+    // console.log('getMessagesAsString completed', channelId, (new Date()).getTime());
     return retval;
     // return messages.filter((m) => m.channel === channelId);
   }

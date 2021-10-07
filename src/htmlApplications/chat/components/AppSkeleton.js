@@ -106,6 +106,7 @@ class AppSkeleton extends Component {
                 backgroundColor: '#263237',
                 paddingTop: '15px',
                 borderRight: '1px solid #333f44',
+                flex: 'none'
               }}
             >
               <Stack

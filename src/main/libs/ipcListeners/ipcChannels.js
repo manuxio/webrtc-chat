@@ -10,8 +10,10 @@ export default (app, appState, appConfig, runningApps, appSockets) => {
     // console.log('Posting to', `${appConfig.roomsApiServer}/user/authenticate`, username, password);
     return new Promise((resolve, /* reject */) => {
       log.info('Sending', 'chat:setchannellastseen');
+      const start = new Date();
       socket.emit('chat:setchannellastseen', channelId, lastseen, (reply) => {
-        log.info('Got reply from socket', reply);
+        const end = new Date();
+        log.info(`Got reply from chat:setchannellastseen in ${end-start}, ms`);
         resolve(reply);
       });
     });
@@ -23,8 +25,11 @@ export default (app, appState, appConfig, runningApps, appSockets) => {
     // log.info('Asking via socket', socket);
     // console.log('Posting to', `${appConfig.roomsApiServer}/user/authenticate`, username, password);
     return new Promise((resolve, /* reject */) => {
+      log.info('Emitting to socket', 'chat:getmychannelsandmessagesandjoin');
+      const start = new Date();
       socket.emit('chat:getmychannelsandmessagesandjoin', ...args, (reply) => {
-        log.info('Got reply from socket', reply);
+        const end = new Date();
+        log.info(`Got reply from chat:getmychannelsandmessagesandjoin in ${end-start} ms`);
         resolve(reply);
       });
     });

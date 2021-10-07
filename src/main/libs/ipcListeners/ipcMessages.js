@@ -26,8 +26,10 @@ export default (app, appState, appConfig, runningApps, appSockets) => {
     // console.log('Posting to', `${appConfig.roomsApiServer}/user/authenticate`, username, password);
     return new Promise((resolve) => {
       log.info('Emitting to socket', 'chat:getbulkbychannel');
+      const start = new Date();
       socket.emit('chat:getbulkbychannel', channelInfo, (reply) => {
-        log.info('Got reply from socket', reply);
+        const end = new Date();
+        log.info(`Got reply from chat:getbulkbychannel in ${end-start} ms`);
         resolve(reply)
       });
     })

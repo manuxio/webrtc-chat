@@ -17,7 +17,7 @@ export const loadMyChannels = (dispatch) => (...args) => {
   log.info('Loading my channels with arguments', ...args);
   return doInvoke('channels:getmy:request', ...args)(dispatch).then(
     (result) => {
-      log.info('Got channels and messages reply in a promise', result);
+      log.info('Got channels and messages reply in a promise, with length', result.length);
       if (result) {
         setChannels(dispatch)(result.channels);
         setBulkMessages(dispatch)(result.messages);

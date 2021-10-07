@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-custom-scrollbars-2/lib/Scrollbars/index.js b/node_modules/react-custom-scrollbars-2/lib/Scrollbars/index.js
+index 8ba8131..88f3b09 100644
+--- a/node_modules/react-custom-scrollbars-2/lib/Scrollbars/index.js
++++ b/node_modules/react-custom-scrollbars-2/lib/Scrollbars/index.js
+@@ -639,7 +639,7 @@ var Scrollbars = function (_Component) {
+                 var thumbVerticalY = scrollTop / (scrollHeight - clientHeight) * (trackVerticalHeight - thumbVerticalHeight);
+                 var thumbVerticalStyle = {
+                     height: thumbVerticalHeight,
+-                    transform: 'translateY(' + thumbVerticalY + 'px)'
++                    transform: 'translateY(' + (thumbVerticalY > 0 ? thumbVerticalY : ((trackVerticalHeight - thumbVerticalHeight) + thumbVerticalY)) + 'px)'
+                 };
+                 if (hideTracksWhenNotNeeded) {
+                     var trackHorizontalStyle = {

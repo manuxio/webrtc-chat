@@ -109,7 +109,7 @@ appStateEmitter.on('new-token', (newToken) => {
     appState.connected = true;
     socket.emit('user:me', (reply) => {
       // console.log('User is', reply.result);
-      console.log('Got user me reply');
+      log.log('Got user me reply');
       appState.user = reply.result;
       startApplication(appState, runningApps, 'chat');
     });
@@ -177,6 +177,7 @@ app
               // // console.log('Proxy Host', proxyHost);
               // console.log('Proxy Port', proxyPort);
               if (appConfig.proxyHost !== proxyUrl) {
+                log.info('Setting proxy as', proxyUrl);
                 appConfig.proxyHost = proxyUrl;
               }
             }
@@ -189,7 +190,7 @@ app
     },
   )
   .then(async () => {
-    log.info(log.levels, log.transports);
+    // log.info(log.levels, log.transports);
     log.info('Collecting system information');
     appState.primaryDisplay = {
       ...screen.getPrimaryDisplay().workAreaSize,

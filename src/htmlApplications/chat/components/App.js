@@ -8,6 +8,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import { withRouter } from "react-router-dom";
 import { loadMyChannels } from '../actions/channels';
+import { loadChannels } from '../actions/newChannels';
 import { loadUsers } from '../actions/users';
 import { getLastMessageDateByChannels } from './selectors/chatMessages';
 import MessagesObserver from './MessagesObserver';
@@ -51,8 +52,9 @@ const mapStateToProps = (state, props, getState) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    loadMyChannels: (...args) => {
-      loadMyChannels(dispatch)(...args);
+    loadMyChannels: (options) => {
+      console.log('In Load Channels');
+      loadChannels(dispatch)(options);
     },
     loadUsers: (...args) => {
       loadUsers(dispatch)(...args)

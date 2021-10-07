@@ -1,0 +1,13 @@
+diff --git a/lib/Scrollbars/index.js b/lib/Scrollbars/index.js
+index 8ba8131bc25dd2b8154b65bbccdaab6945a9127e..cbe5678cac46ae8eafbbeb6a6d9e7c09f85498d6 100644
+--- a/lib/Scrollbars/index.js
++++ b/lib/Scrollbars/index.js
+@@ -639,7 +639,7 @@ var Scrollbars = function (_Component) {
+                 var thumbVerticalY = scrollTop / (scrollHeight - clientHeight) * (trackVerticalHeight - thumbVerticalHeight);
+                 var thumbVerticalStyle = {
+                     height: thumbVerticalHeight,
+-                    transform: 'translateY(' + thumbVerticalY + 'px)'
++                    transform: 'translateY(' + (thumbVerticalY > 0 ? thumbVerticalY : ((trackVerticalHeight - thumbVerticalHeight) + thumbVerticalY)) + 'px)'
+                 };
+                 if (hideTracksWhenNotNeeded) {
+                     var trackHorizontalStyle = {
