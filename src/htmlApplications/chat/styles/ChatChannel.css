@@ -1,0 +1,17 @@
+.ql-editor {
+  max-height: 150px;
+}
+
+.ReactVirtualized__List::-webkit-scrollbar {
+  width: 7px;               /* width of the entire scrollbar */
+}
+
+.ReactVirtualized__List::-webkit-scrollbar-track {
+  background: transparent;        /* color of the tracking area */
+}
+
+.ReactVirtualized__List::-webkit-scrollbar-thumb {
+  background-color: #263237;    /* color of the scroll thumb */
+  border-radius: 20px;       /* roundness of the scroll thumb */
+  border: 3px solid transparent;  /* creates padding around scroll thumb */
+}

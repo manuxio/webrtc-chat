@@ -1,0 +1,22 @@
+{
+  "name": "serfin-rooms",
+  "productName": "Serfin Rooms",
+  "version": "1.0.14",
+  "description": "Serfin Corporate Rooms Client",
+  "main": "./dist/main/main.js",
+  "author": {
+    "name": "Antonino Emanuele Cappelleri",
+    "email": "manu@cappelleri.net",
+    "url": "https://github.com/manuxio"
+  },
+  "scripts": {
+    "electron-rebuild": "node -r ../../.erb/scripts/babel-register.js ../../.erb/scripts/electron-rebuild.js",
+    "link-modules": "node -r ../../.erb/scripts/babel-register.js ../../.erb/scripts/link-modules.js",
+    "postinstall": "yarn electron-rebuild && yarn link-modules"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "coffe-script": "^0.0.1-security",
+    "utf-8-validate": "^5.0.5"
+  }
+}

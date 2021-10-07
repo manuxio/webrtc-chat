@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "mode": "prod",
+  "roomsServer": "https://rooms.serfin97srl.com",
+  "roomsApiServer": "https://rooms.serfin97srl.com/api/",
+  "appName": "Rooms Agent",
+  "appDescription": "Realtime CRM"
+}
