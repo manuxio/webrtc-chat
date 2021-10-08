@@ -36,6 +36,7 @@ class ChatBox extends React.Component {
           onScrollBottom={onScrollBottom}
 					owner={this.props.owner}
 					messages={this.props.messages}
+          onReply={this.props.onReply}
 				/>
 			</div>
 		);

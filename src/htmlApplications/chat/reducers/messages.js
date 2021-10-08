@@ -145,19 +145,19 @@ export default function messagesReducer(
       };
     }
 
-    case CHANNELS_REMOTE_ADD:
-    case CHANNELS_ADD: {
-      console.log('ACTION', action);
-      const channel = action.payload.channel;
-      const { messages } = state;
-      return {
-        ...state,
-        messages: {
-          ...messages,
-          [channel._id]: [],
-        },
-      };
-    }
+    // case CHANNELS_REMOTE_ADD:
+    // case CHANNELS_ADD: {
+    //   console.log('ACTION', action);
+    //   const channel = action.payload.channel;
+    //   const { messages } = state;
+    //   return {
+    //     ...state,
+    //     messages: {
+    //       ...messages,
+    //       [channel._id]: [],
+    //     },
+    //   };
+    // }
 
     default:
       return state;

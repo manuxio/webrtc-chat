@@ -9,7 +9,8 @@ import {
   CHANNEL_MESSAGE_NEW_LOCAL,
   CHANNEL_MESSAGE_UPDATE_ONE,
   CHANNEL_SET_VISIBLE,
-  CHANNELS_SET_LASTSEEN
+  CHANNELS_SET_LASTSEEN,
+  CHANNELS_ADD
 } from '../actiontypes/newChannels';
 
 export const loadChannels = (dispatch) => (options) =>
@@ -149,6 +150,19 @@ export const setLastSeen = (dispatch) => (channelId, lastSeen = new Date()) => {
       return results;
     });
 }
+
+export const addChannelLocal = (dispatch) => (channel) => {
+  const addChannelAction = makeDataAction(
+    CHANNELS_ADD,
+    'channel',
+    {
+      ...channel,
+      locallyCreated: true
+    },
+  );
+  return dispatch(addChannelAction);
+}
+
 
 const makeDataAction = (type, dataName, data) => {
   if (dataName) {

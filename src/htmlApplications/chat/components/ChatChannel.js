@@ -683,6 +683,10 @@ class ChatChannel extends Component {
                     }}
                     messages={messages}
                     isTyping={false}
+
+                    onReply={(msgid) => {
+                      this.handleReply(msgid);
+                    }}
                   />
                 ) : null}
               </>

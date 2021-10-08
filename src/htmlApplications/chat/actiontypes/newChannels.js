@@ -10,4 +10,7 @@ export const CHANNEL_MESSAGE_UPDATE_ONE = 'NEW_CHANNEL_MESSAGE_UPDATE_ONE';
 export const CHANNEL_SET_VISIBLE = 'NEW_CHANNEL_SET_VISIBLE';
 
 export const CHANNELS_SET_LASTSEEN = 'NEW_CHANNELS_SET_LASTSEEN';
+export const CHANNELS_SET_VIDEO_SESSION = 'channel:setvideosession';
+export const CHANNELS_ADD = 'NEW_CHANNELS_ADD';
 
+export const CHANNELS_REMOTE_ADD = 'channels:newchannel';

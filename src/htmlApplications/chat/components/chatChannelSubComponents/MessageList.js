@@ -78,6 +78,7 @@ class MessageList extends React.Component {
 			{reversedMessages.map(
 				(messageItem, pos) => (
 					<MessageItem
+            onReply={this.props.onReply}
             prevMessage={reversedMessages[pos+1] || null}
             nextMessage={reversedMessages[pos-1] || null}
 						key={messageItem.id}
@@ -86,6 +87,7 @@ class MessageList extends React.Component {
 						senderAvatar={messageItem.senderAvatar}
 						message={messageItem.message}
             date={messageItem.date}
+            msgid={messageItem._id}
 					/>
 				)
 			)}

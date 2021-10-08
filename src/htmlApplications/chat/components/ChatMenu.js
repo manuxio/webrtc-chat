@@ -23,7 +23,7 @@ import HighlightOffOutlinedIcon from '@material-ui/icons/HighlightOffOutlined';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import PersonAddOutlinedIcon from '@material-ui/icons/PersonAddOutlined';
 import { doInvoke } from '../actions/ipcRequest';
-import { addChannelLocal } from '../actions/channels';
+import { addChannelLocal } from '../actions/newChannels';
 import PersonOutlinedIcon from '@material-ui/icons/PersonOutlined';
 import capitalize from 'capitalize-the-first-letter';
 import log from 'electron-log';
@@ -229,7 +229,7 @@ class MyChatMenu extends Component {
       const chanAlert =
         alerts && alerts.byChannel ? alerts.byChannel[c._id] : {};
       return (
-        <Tooltip title={c.name} placement="right">
+        <Tooltip key={c._id} title={c.name} placement="right">
           <ListItemButton
             dense
             key={c._id}
@@ -280,7 +280,7 @@ class MyChatMenu extends Component {
           ? alerts.byChannel[channel._id]
           : {};
       return (
-      <Tooltip title={capitalizedUser}
+      <Tooltip key={user._id} title={capitalizedUser}
       placement="right">
         <ListItemButton
           dense

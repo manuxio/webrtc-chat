@@ -152,6 +152,37 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+
+.chatApp__convMessageValue blockquote {
+  border-left: 2px solid #ff6a00;
+  margin: 7px 2px 7px 2px;
+  padding-left: 4px;
+  text-align: left;
+}
+
+.chatApp__convMessageItem .replyButton {
+  /* opacity: 0; */
+  height: 40px;
+  margin-right: 10px;
+  /* padding: 6; */
+  color: rgba(255,255,255,0.34);
+  /* margin: '0 4px'; */
+
+}
+.chatApp__convMessageItem--left .replyButton {
+  margin-left: 10px;
+}
+.chatApp__convMessageItem .replyButton:hover {
+  color: rgba(255,255,255,0.87)
+}
+.chatApp__convMessageItem .replyButton svg {
+  font-size: 20,
+}
+
+.chatApp__convMessageItem--right .chatApp__convMessageValue blockquote {
+  text-align: right;
+}
+
 .chatApp_convMessageItem--last .chatApp__convMessageValue {
   border-bottom-right-radius: 10px;
   border-bottom-left-radius: 10px;

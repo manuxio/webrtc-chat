@@ -30,8 +30,8 @@ const {
 
 
 const start = async () => {
-  if (!config.scripts || !config.scripts.sendmessage || !config.scripts.sendmessage.credentials) {
-    throw new Error('No autoLogin section found in config (path: scripts.sendmessage.autoLogin). Please check your config file.')
+  if (!config?.scripts?.sendmessage?.credentials) {
+    throw new Error('No autoLogin section found in config (path: scripts.sendmessage.credentials). Please check your config file.')
   }
   const credentials = config.scripts.sendmessage.credentials;
   if (!credentials) {
@@ -59,7 +59,7 @@ const start = async () => {
   const socket = io(config.roomsApiServer, {
     transports: ['websocket'],
     'query': 'token=' + token + '&mode=agent',
-    reconnection: true
+    reconnection: false
   });
   socket.once('connect', () => {
     console.log('Connected!');
@@ -84,5 +84,8 @@ const start = async () => {
     })
   });
 }
-
-start();
+try {
+  start();
+} catch(e) {
+  console.error(e);
+}

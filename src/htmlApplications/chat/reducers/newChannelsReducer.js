@@ -1,6 +1,4 @@
-import {
-  NEW_CHANNELS_NAME
-} from '../libs/constants';
+import { NEW_CHANNELS_NAME } from '../libs/constants';
 
 import {
   CHANNELS_FULL_UPDATE,
@@ -12,15 +10,75 @@ import {
   CHANNEL_SET_VISIBLE,
   CHANNELS_SET_LASTSEEN,
   CHANNEL_MESSAGE_UPDATE_ONE,
-  CHANNEL_MESSAGE_NEW_REMOTE
+  CHANNEL_MESSAGE_NEW_REMOTE,
+  CHANNELS_SET_VIDEO_SESSION,
+  CHANNELS_ADD,
+  CHANNELS_REMOTE_ADD
 } from '../actiontypes/newChannels';
 
 const MAX_MESSAGES = 100;
 
 export const initialState = {};
 
-export default function newChannelsReducer (state = initialState, action, prevState, nextState) {
-  switch(action.type) {
+export default function newChannelsReducer(
+  state = initialState,
+  action,
+  prevState,
+  nextState,
+) {
+  switch (action.type) {
+    case CHANNELS_REMOTE_ADD: {
+      const { channel } = action.payload;
+
+      return {
+        ...state,
+        channels: state.channels.concat([
+          {
+            ...channel,
+            messages: [],
+            remotelyCreated: true,
+            unseenMessages: 0,
+            unseenMentionedMessages: 0,
+          },
+        ]),
+        updateTime: new Date().getTime(),
+      };
+    }
+    case CHANNELS_ADD: {
+      const { channel } = action.payload;
+
+      return {
+        ...state,
+        channels: state.channels.concat([
+          {
+            ...channel,
+            messages: [],
+            unseenMessages: 0,
+            unseenMentionedMessages: 0,
+          },
+        ]),
+        updateTime: new Date().getTime(),
+      };
+    }
+    case CHANNELS_SET_VIDEO_SESSION: {
+      const { channel: channelId, session: sessionId } = action.payload;
+      console.log('Reducer', CHANNELS_SET_VIDEO_SESSION, action.payload);
+
+      return {
+        ...state,
+        channels: state.channels.map((c) => {
+          if (c._id !== channelId)
+            return {
+              ...c,
+            };
+          return {
+            ...c,
+            videoSessionId: sessionId,
+          };
+        }),
+        updateTime: new Date().getTime(),
+      };
+    }
     case CHANNEL_MESSAGE_NEW_REMOTE: {
       // console.log('NEW MESSAGE', action);
       /*
@@ -35,127 +93,126 @@ export default function newChannelsReducer (state = initialState, action, prevSt
       */
       // console.log('STATE', state, action);
       // return state;
-      const {
-        channel: channelId,
-        ...newMessage
-      } = action.payload;
+      const { channel: channelId, ...newMessage } = action.payload;
       console.log('CHANNEL', channelId, 'NEW MESSAGE', newMessage);
-      const channels = state.channels.map((c) => Object.assign({}, c)).map((c) => {
-        if (c._id === channelId) {
-          console.log('DEBUG C', typeof c.messages, Array.isArray(c.messages));
-          const messages = c.messages.map((m) => Object.assign({}, m));
-          messages.push(newMessage);
-          c.messages = messages;
+      const channels = state.channels
+        .map((c) => Object.assign({}, c))
+        .map((c) => {
+          if (c._id === channelId) {
+            console.log(
+              'DEBUG C',
+              typeof c.messages,
+              Array.isArray(c.messages),
+            );
+            const messages = c.messages.map((m) => Object.assign({}, m));
+            messages.push(newMessage);
+            c.messages = messages;
+            return c;
+            // return {
+            //   ...c,
+            //   messages
+            // };
+          }
           return c;
-          // return {
-          //   ...c,
-          //   messages
-          // };
-        }
-        return c;
-      });
+        });
       console.log('channels', channels);
       return {
         ...state,
-        channels
+        channels,
       };
-
     }
     case CHANNEL_MESSAGE_UPDATE_ONE: {
-      const {
-        channelId,
-        oldMessageId,
-        newProps
-      } = action.payload;
-      const channels = state.channels.map((c) => Object.assign({}, c)).map((c) => {
-        if (c._id === channelId) {
-          const messages = c.messages.map((m) => Object.assign({}, m)).map((msg) => {
-            if (msg._id === oldMessageId) {
-              return Object.assign({}, msg, newProps);
-            }
-            return msg;
-          });
-          return {
-            ...c,
-            messages
-          };
-        }
-        return c;
-      });
+      const { channelId, oldMessageId, newProps } = action.payload;
+      const channels = state.channels
+        .map((c) => Object.assign({}, c))
+        .map((c) => {
+          if (c._id === channelId) {
+            const messages = c.messages
+              .map((m) => Object.assign({}, m))
+              .map((msg) => {
+                if (msg._id === oldMessageId) {
+                  return Object.assign({}, msg, newProps);
+                }
+                return msg;
+              });
+            return {
+              ...c,
+              messages,
+            };
+          }
+          return c;
+        });
 
       return {
-        channels
-      }
+        channels,
+      };
     }
     case CHANNEL_SET_VISIBLE: {
       const { channelId, visible } = action.payload;
 
-      const channels = state.channels.map((c) => Object.assign({}, c)).map((c) => {
-        if (c._id === channelId) {
-          c.visible = visible;
-        } else {
-          c.visible = false;
-          // console.log('Should slice', c);
-          if (c.messages.length > MAX_MESSAGES) {
-            console.log('Slicing messages for chan', c);
-            c.messages = c.messages.slice(-MAX_MESSAGES);
+      const channels = state.channels
+        .map((c) => Object.assign({}, c))
+        .map((c) => {
+          if (c._id === channelId) {
+            c.isVisible = visible;
+          } else {
+            c.isVisible = false;
+            // console.log('Should slice', c);
+            if (c.messages.length > MAX_MESSAGES) {
+              console.log('Slicing messages for chan', c);
+              c.messages = c.messages.slice(-MAX_MESSAGES);
+            }
           }
-        }
-        return c;
-      });
+          return c;
+        });
 
       return {
-        channels
-      }
+        channels,
+      };
     }
 
     case CHANNELS_SET_LASTSEEN: {
       const { channelId, lastSeen } = action.payload;
 
-      const channels = state.channels.map((c) => Object.assign({}, c)).map((c) => {
-        if (c._id === channelId) {
-          c.lastSeen = lastSeen;
-        }
-        return c;
-      });
+      const channels = state.channels
+        .map((c) => Object.assign({}, c))
+        .map((c) => {
+          if (c._id === channelId) {
+            c.lastSeen = lastSeen;
+          }
+          return c;
+        });
 
       return {
-        channels
-      }
+        channels,
+      };
     }
 
     case CHANNELS_FULL_UPDATE: {
       // console.log('action data', action);
       const { channels } = action.payload;
       return {
-        channels
+        channels,
       };
     }
 
     case CHANNEL_PREPENDING_MESSAGES: {
-      const {
-        channelId
-      } = action.payload;
+      const { channelId } = action.payload;
       const channels = state.channels.map((c) => {
         if (c._id === channelId) {
           return Object.assign({}, c, {
-            loadingPrev: true
+            loadingPrev: true,
           });
         }
         return c;
       });
       return {
-        channels
+        channels,
       };
     }
 
     case CHANNEL_PREPEND_MESSAGES: {
-      const {
-        messages,
-        channelId,
-        isStart,
-        isEnd
-      } = action.payload;
+      const { messages, channelId, isStart, isEnd } = action.payload;
       const channels = state.channels.map((c) => {
         if (c._id === channelId) {
           return Object.assign({}, c, {
@@ -163,40 +220,33 @@ export default function newChannelsReducer (state = initialState, action, prevSt
             // messages: messages.concat(c.messages).slice(0, 150),
             messages: messages.concat(c.messages),
             isEnd,
-            isStart
+            isStart,
           });
         }
         return c;
       });
       return {
-        channels
+        channels,
       };
     }
 
     case CHANNEL_APPENDING_MESSAGES: {
-      const {
-        channelId
-      } = action.payload;
+      const { channelId } = action.payload;
       const channels = state.channels.map((c) => {
         if (c._id === channelId) {
           return Object.assign({}, c, {
-            loadingNext: true
+            loadingNext: true,
           });
         }
         return c;
       });
       return {
-        channels
+        channels,
       };
     }
 
     case CHANNEL_APPEND_MESSAGES: {
-      const {
-        messages,
-        channelId,
-        isStart,
-        isEnd
-      } = action.payload;
+      const { messages, channelId, isStart, isEnd } = action.payload;
       const channels = state.channels.map((c) => {
         if (c._id === channelId) {
           return Object.assign({}, c, {
@@ -204,33 +254,31 @@ export default function newChannelsReducer (state = initialState, action, prevSt
             messages: c.messages.concat(messages).slice(-MAX_MESSAGES),
             // messages: c.messages.concat(messages),
             isEnd,
-            isStart
+            isStart,
           });
         }
         return c;
       });
       return {
-        channels
+        channels,
       };
     }
 
     case CHANNEL_MESSAGE_NEW_LOCAL: {
-      const {
-        channel: channelId,
-      } = action.payload.message;
+      const { channel: channelId } = action.payload.message;
       const channels = state.channels.map((c) => {
         if (c._id === channelId) {
           const messages = c.messages.slice(0);
           console.log('messages', messages);
           messages.push(action.payload.message);
           return Object.assign({}, c, {
-            messages: messages
+            messages: messages,
           });
         }
         return c;
       });
       return {
-        channels
+        channels,
       };
     }
 

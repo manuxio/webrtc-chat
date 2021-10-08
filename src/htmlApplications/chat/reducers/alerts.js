@@ -1,15 +1,17 @@
-// import log from 'electron-log';
+import log from 'electron-log';
 // import { parse } from 'path';
 // import {
 //   APPALERTS_CHANGE
 // } from '../actiontypes/alerts';
-
 import {
+  NEW_CHANNELS_NAME
+} from '../libs/constants';
+import {
+  CHANNEL_SET_VISIBLE,
   CHANNELS_SET_LASTSEEN,
-  CHANNELS_UPDATE,
-  CHANNELS_SET_VISIBLE,
+  CHANNELS_FULL_UPDATE,
   CHANNELS_ADD
-} from '../actiontypes/channels';
+} from '../actiontypes/newChannels';
 
 import {
   MESSAGES_BULK_LOAD,
@@ -58,13 +60,14 @@ export default function alertsReducer (state = initialState, action, prevState, 
   // log.log('In Alert Reducer', action.type, fullState);
   switch (action.type) {
     case MESSAGES_NEW_REMOTE: {
-      // log.log('[ALERTS REDUCER] Recalculating after', action.type);
+      log.log('[ALERTS REDUCER] Recalculating after', action.type);
       const msg = action.payload;
       const {
         channel: channelId
       } = msg;
+      console.log('state', state);
       const {
-        channels: {
+        [NEW_CHANNELS_NAME]: {
           channels
         },
         appState: {
@@ -106,17 +109,16 @@ export default function alertsReducer (state = initialState, action, prevState, 
       return copyOfState;
     }
 
-    case MESSAGES_BULK_LOAD:
-    case CHANNELS_UPDATE:
+    case CHANNEL_SET_VISIBLE:
     case CHANNELS_SET_LASTSEEN:
-    case CHANNELS_SET_VISIBLE:  {
+    case CHANNELS_FULL_UPDATE: {
     // case MESSAGES_NEW:
       // const start = new Date();
       // log.log('[ALERTS REDUCER] Start', start.getTime());
       // log.log('[ALERTS REDUCER] Recalculating after', action.type, action.payload);
       // log.log('********** RECALCULATE ***********', action.type, fullState);
       const {
-        channels: {
+        [NEW_CHANNELS_NAME]: {
           channels
         },
         messages: {
@@ -129,7 +131,7 @@ export default function alertsReducer (state = initialState, action, prevState, 
       const {
         _id: myId
       } = user || {};
-      const channelIds = Object.keys(messages || {});
+      const channelIds = channels.map(c => c._id);
       let unseenMentions = 0;
       let unseenMessages = 0;
       let unseenMentioningMessages = [];
@@ -139,7 +141,7 @@ export default function alertsReducer (state = initialState, action, prevState, 
         if (!channel) {
           return;
         }
-        const channelMessages = messages[channelId] || [];
+        const channelMessages = channel.messages;
         // log.log('channelMessages', channelMessages);
         if (!channel.isVisible) {
           // log.log(`[ALERTS REDUCER] ${channel.name} is not visible`);

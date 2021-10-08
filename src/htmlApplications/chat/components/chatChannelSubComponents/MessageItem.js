@@ -3,10 +3,23 @@ import AccountCircleOutlinedIcon from '@material-ui/icons/AccountCircleOutlined'
 import capitalize from 'capitalize-the-first-letter';
 import showdown from 'showdown';
 import { format } from 'date-fns';
+import IconButton from '@material-ui/core/IconButton';
+import Reply from '@material-ui/icons/Reply';
+import { convert } from 'html-to-text';
+
 const converter = new showdown.Converter();
 
 class MessageItem extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hover: false
+    }
+  }
   render() {
+    const {
+      hover
+    } = this.state;
     const { prevMessage, nextMessage } = this.props;
     const isFirst =
       !prevMessage || prevMessage.from._id !== this.props.sender._id;
@@ -39,6 +52,16 @@ class MessageItem extends React.Component {
     return (
       <div
         className={`chatApp__convMessageItem ${messagePosition} ${isFirstClass} ${isLastClass} clearfix`}
+        onMouseEnter={() => {
+          this.setState({
+            hover: true
+          })
+        }}
+        onMouseLeave={() => {
+          this.setState({
+            hover: false
+          })
+        }}
       >
         {isIncoming && isFirst ? (
           this.props.senderAvatar ? (
@@ -72,6 +95,24 @@ class MessageItem extends React.Component {
             }`}
           >{`${format(new Date(this.props.date), 'Pp')}`}</div>
         </div>
+        {
+          hover
+          ? (
+            <IconButton
+              className="replyButton"
+              onClick={() => {
+                if (this.props.onReply) {
+                  this.props.onReply({
+                    msgid: this.props.msgid,
+                    textversion: convert(converter.makeHtml(this.props.message)) || '',
+                  });
+                }
+              }}
+            ><Reply />
+            </IconButton>
+          )
+          : null
+        }
       </div>
     );
   }

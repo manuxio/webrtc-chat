@@ -40,8 +40,8 @@ const mainReducers = combineReducers({
   messages: makeDummyReducer({ messages: {}}),
   users: makeDummyReducer({ users: {}}),
   channels: makeDummyReducer({ channels: undefined }),
-  alerts: makeDummyReducer({}),
   [NEW_CHANNELS_NAME]: makeDummyReducer({}),
+  alerts: makeDummyReducer({}),
 });
 
 const specialReducers = combineReducersWithFullState({
@@ -55,8 +55,8 @@ const specialReducers = combineReducersWithFullState({
   channels,
   users,
   messages,
+  [NEW_CHANNELS_NAME]: newChannelsReducer,
   alerts,
-  [NEW_CHANNELS_NAME]: newChannelsReducer
 });
 
 const rootReducer = (state, action) => {
