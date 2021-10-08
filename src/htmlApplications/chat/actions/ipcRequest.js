@@ -36,7 +36,7 @@ export const doInvoke = (...originalArgs) => {
           return ipcRenderer.invoke(request, ...arg);
         }
       )
-      .timeout(1000)
+      .timeout(2500)
       .then(
         (response) => {
           // console.log('response', request, arg, response);
