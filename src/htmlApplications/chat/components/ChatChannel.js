@@ -16,22 +16,19 @@ import { getMe } from './selectors/chatChannel';
 import { getMessages, getChannel } from './selectors/newChatChannel';
 import MessageBubble from './MessageBubble';
 import AppBar from '@material-ui/core/AppBar';
+import Stack from '@material-ui/core/Stack';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import memoizee from 'memoizee';
-import {
-  setVisible,
-  setLastSeen
-} from '../actions/newChannels';
+import { setVisible, setLastSeen } from '../actions/newChannels';
+import ChanInfo from './ChanInfo';
 // import { setLastSeen } from '../actions/channels';
 import {
   loadBulkMessagesByChannelId,
   sendMessageAction,
 } from '../actions/messages';
-import {
-  sendMessage
-} from '../actions/newChannels';
+import { sendMessage } from '../actions/newChannels';
 import capitalize from 'capitalize-the-first-letter';
 import { styled } from '@material-ui/styles';
 import Fab from '@material-ui/core/Fab';
@@ -174,6 +171,7 @@ class ChatChannel extends Component {
     super(props);
     this.myList = React.createRef();
     this.editorContainer = React.createRef();
+    this.chatBoxMessageList = React.createRef();
     this.memoizedMakeBubbles = memoizee(this.makeBubbles, {
       max: 2,
       length: 2,
@@ -190,9 +188,9 @@ class ChatChannel extends Component {
       editorValue: '',
       isFullScrolled: false,
       videoSessionToken: undefined,
-      totalMessages: 100
+      totalMessages: 100,
     };
-    this.boundInfiniteLoaderChild = this.infiniteLoaderChild.bind(this);
+    // this.boundInfiniteLoaderChild = this.infiniteLoaderChild.bind(this);
   }
 
   componentDidMount() {
@@ -231,8 +229,8 @@ class ChatChannel extends Component {
         console.log('Editor resized!', e);
         const [rect] = e;
         this.setState({
-          editorHeight: rect.contentRect.height
-        })
+          editorHeight: rect.contentRect.height,
+        });
       }).observe(this.editorContainer.current);
       // this.editorContainer.current.addEventListener('resize', (e) => {
       //   console.log('Editor resized!', e.target);
@@ -264,24 +262,40 @@ class ChatChannel extends Component {
         'Scrolling, because channel is different',
         new Date().getTime(),
       );
-      this.cache.clearAll();
-      this.scrollBars && this.scrollBars.scrollToBottom();
-      const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
-
-      if (this.myList.current && lastMessage) {
-        // console.log('Scrolling to the end!', this.myList.current.scrollToRow);
-        setTimeout(() => {
-          this.myList.current.scrollToRow(lastMessage.cnt - 1);
-        }, 2);
+      if (
+        this.chatBoxMessageList.current?.scrollTop !== 0 &&
+        this.chatBoxMessageList.current
+      ) {
+        this.chatBoxMessageList.current.scrollTop = 0;
       }
+      // console.log('chatBoxMessageList scroll top', this.chatBoxMessageList.current?.scrollTop);
+      // this.cache.clearAll();
+      // this.scrollBars && this.scrollBars.scrollToBottom();
+      // const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+
+      // if (this.myList.current && lastMessage) {
+      //   // console.log('Scrolling to the end!', this.myList.current.scrollToRow);
+      //   setTimeout(() => {
+      //     this.myList.current.scrollToRow(lastMessage.cnt - 1);
+      //   }, 2);
+      // }
       this.setState({
         videoSessionToken: null,
+        info: false,
       });
       setChannelVisible(this.props.channel._id);
     } else {
       if (gotNewMessage && this.state.isFullScrolled) {
-        console.log('Scrolling, because got at least one new message');
-        this.scrollBars && this.scrollBars.scrollToBottom();
+        console.log(
+          'Scrolling, because got at least one new message',
+          this.state,
+        );
+        if (
+          this.chatBoxMessageList.current?.scrollTop !== 0 &&
+          this.chatBoxMessageList.current
+        ) {
+          this.chatBoxMessageList.current.scrollTop = 0;
+        }
       }
     }
 
@@ -435,105 +449,6 @@ class ChatChannel extends Component {
     }
   }
 
-  _isRowLoaded(arg) {
-    const {
-      messages
-    } = this.props;
-
-    const { index } = arg;
-    const found = messages.reduce((prev, curr) => {
-      if (prev) return prev;
-      if (curr.cnt === index + 1) return true;
-    }, false);
-    return found;
-  }
-
-  _loadMoreRows({ startIndex, stopIndex }) {
-    console.log('Start', startIndex);
-    console.log('Stop', stopIndex);
-  }
-
-  getBubble(index, isScrolling) {
-    if (isScrolling) {
-      return <div>Scrolling...</div>;
-    }
-    return <div>Messaggio n. {index + 1}</div>;
-  }
-
-  cellMeasurerChild({ registerChild }) {
-    return (
-      <div ref={registerChild} style={style}>
-        {this.getBubble(index, isScrolling)}
-      </div>
-    );
-  }
-  infiniteLoaderChild({ onRowsRendered }) {
-    const { channel, messages } = this.props;
-    const { totalMessages } = this.state;
-    console.log('Setting scroll to index as ', messages.length > 0 ? messages[messages.length - 1].cnt - 1 : 0)
-    return (
-      <AutoSizer>
-        {({ width, height }) => (
-          <List
-            onScroll={({ clientHeight, scrollHeight, scrollTop }) => {
-              console.log(clientHeight, scrollHeight, scrollTop);
-              if ((scrollHeight - clientHeight - scrollTop) < 10) {
-                console.log('Fully scrolled');
-                if (!this.state.isFullScrolled) {
-                  this.setState({
-                    isFullScrolled: true
-                  });
-                }
-              } else {
-                console.log('Not fully scrolled');
-                if (this.state.isFullScrolled) {
-                  this.setState({
-                    isFullScrolled: false
-                  });
-                }
-              }
-              // setTimeout(() => {
-              //   this.setState({
-              //     totalMessages: totalMessages + 50
-              //   })
-              // }, 1000);
-            }}
-            ref={this.myList}
-            height={height}
-            rowCount={totalMessages || channel.totalMessages}
-            deferredMeasurementCache={this.cache}
-            rowHeight={this.cache.rowHeight}
-            onRowsRendered={onRowsRendered}
-            estimatedRowSize={30}
-            rowRenderer={({ index, isScrolling, key, parent, style }) => {
-              return (
-                <CellMeasurer
-                  cache={this.cache}
-                  columnIndex={0}
-                  key={key}
-                  parent={parent}
-                  rowIndex={index}
-                >
-                  {({ registerChild }) => (
-                    // 'style' attribute required to position cell (within parent List)
-                    <div ref={registerChild} style={style}>
-                      {this.getBubble(index, isScrolling)}
-                    </div>
-                  )}
-                </CellMeasurer>
-              );
-            }}
-            width={width}
-          />
-        )}
-      </AutoSizer>
-    );
-  }
-
-  makeSingleBubbleFunction({ measure, registerChild }) {
-    const { messages } = this.props;
-  }
-
   render() {
     const {
       channel,
@@ -590,7 +505,7 @@ class ChatChannel extends Component {
               height: '100vh',
             }}
           >
-            <AppBar position="static" sx={{ height: '48px', flex: 'none'}}>
+            <AppBar position="static" sx={{ height: '48px', flex: 'none' }}>
               <Toolbar variant="dense">
                 <Typography
                   variant="h6"
@@ -635,62 +550,102 @@ class ChatChannel extends Component {
                       <VideoCallOutlinedIcon />
                     </IconButton>
                   ) : null}
-                  <IconButton size="small" color="inherit">
+                  <IconButton
+                    size="small"
+                    color="inherit"
+                    onClick={() => {
+                      this.setState({
+                        info: !this.state.info,
+                      });
+                    }}
+                  >
                     <InfoOutlinedIcon />
                   </IconButton>
                 </div>
               </Toolbar>
             </AppBar>
-            <div
+            <Stack
               style={{
-                padding: '10px',
-                order: 0,
-                flex: '1 1 auto',
+                flex: '1',
                 paddingBottom: '5px',
-                height: `calc(100% - ${this.state.editorHeight}px)`,
+                height: `calc(100% - ${this.state.editorHeight}px - 10px)`,
               }}
+              direction="row"
+              justifyContent="space-between"
+              alignItems="stretch"
+              spacing={0}
             >
-              <>
-                {messages.length ? (
-                  <ChatBox
-                    boxHeight={`calc(100vh - ${this.state.editorHeight}px - 63px)`}
-                    onScrollTop={() => {
-                      // console.log('ChatChannel Scroll Top');
-                      this.props.loadPrevMessages({
-                        channelId: channel._id,
-                        start: messages[0] ? messages[0]._id : null
-                      });
-                    }}
-                    onScrollBottom={() => {
-                      // console.log('ChatChannel Scroll Bottom');
-                      if (!channel.isEnd) {
-                        this.props.loadNextMessages({
+              <Box
+                sx={{
+                  padding: '5px',
+                  order: 0,
+                  height: `100%`,
+                  flex: 1
+                }}
+              >
+                <>
+                  {messages.length ? (
+                    <ChatBox
+                      ref={this.chatBoxMessageList}
+                      boxHeight={`calc(100vh - ${this.state.editorHeight}px - 63px)`}
+                      onScrollTop={() => {
+                        // console.log('ChatChannel Scroll Top');
+                        this.props.loadPrevMessages({
                           channelId: channel._id,
-                          start: messages.length > 0 ? messages[messages.length - 1]._id : null
+                          start: messages[0] ? messages[0]._id : null,
                         });
-                      }
-                    }}
-                    owner={user}
-                    ownerAvatar={user.avatar}
-                    sendMessage={() => {
-
-                    }}
-                    typing={() => {
-
-                    }}
-                    resetTyping={() => {
-
-                    }}
-                    messages={messages}
-                    isTyping={false}
-
-                    onReply={(msgid) => {
-                      this.handleReply(msgid);
-                    }}
-                  />
-                ) : null}
-              </>
-            </div>
+                      }}
+                      onScrollBottom={() => {
+                        // console.log('ChatChannel Scroll Bottom');
+                        if (!this.state.isFullScrolled) {
+                          this.setState({
+                            isFullScrolled: true,
+                          });
+                        }
+                        if (!channel.isEnd) {
+                          this.props.loadNextMessages({
+                            channelId: channel._id,
+                            start:
+                              messages.length > 0
+                                ? messages[messages.length - 1]._id
+                                : null,
+                          });
+                        }
+                      }}
+                      onScrollEnd={(scrollValues) => {
+                        console.log('Scroll Values', scrollValues.scrollTop);
+                        if (Math.abs(scrollValues.scrollTop) > 10) {
+                          this.setState({
+                            isFullScrolled: false,
+                          });
+                        }
+                      }}
+                      owner={user}
+                      ownerAvatar={user.avatar}
+                      sendMessage={() => {}}
+                      typing={() => {}}
+                      resetTyping={() => {}}
+                      messages={messages}
+                      isTyping={false}
+                      onReply={(msgid) => {
+                        this.handleReply(msgid);
+                      }}
+                    />
+                  ) : null}
+                </>
+              </Box>
+              <Box
+                sx={{
+                  marginTop: '13px',
+                  marginBottom: '13px',
+                  transition: "width 1s",
+                  width: this.state.info ? '200px' : '0px',
+                  overflow: this.state.info ? 'auto' : 'hidden'
+                }}
+              >
+                <ChanInfo channel={channel} />
+              </Box>
+            </Stack>
             <Box
               ref={this.editorContainer}
               sx={{

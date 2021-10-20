@@ -25,15 +25,19 @@ class ChatBox extends React.Component {
 	render() {
     const {
       onScrollTop,
-      onScrollBottom
+      onScrollBottom,
+      onScrollEnd,
+      innerRef
     } = this.props;
-    console.log('this.props.boxHeight', this.props.boxHeight);
+
 		return (
 			<div className={"chatApp__conv"} style={{
         height: this.props.boxHeight}}>
 				<MessageList
+          ref={innerRef}
           onScrollTop={onScrollTop}
           onScrollBottom={onScrollBottom}
+          onScrollEnd={onScrollEnd}
 					owner={this.props.owner}
 					messages={this.props.messages}
           onReply={this.props.onReply}
@@ -43,4 +47,6 @@ class ChatBox extends React.Component {
 	}
 }
 
-export default ChatBox;
+export default React.forwardRef((props, ref) => (
+  <ChatBox {...props} innerRef={ref} />
+));

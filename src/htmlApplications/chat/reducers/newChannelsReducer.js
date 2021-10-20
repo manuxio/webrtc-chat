@@ -29,7 +29,9 @@ export default function newChannelsReducer(
   switch (action.type) {
     case CHANNELS_REMOTE_ADD: {
       const { channel } = action.payload;
-
+      if (state.channels.filter(c => c._id === channel._id).length > 0) {
+        return state;
+      }
       return {
         ...state,
         channels: state.channels.concat([

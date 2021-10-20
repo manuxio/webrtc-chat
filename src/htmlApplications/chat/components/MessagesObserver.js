@@ -5,6 +5,7 @@ import Promise from 'bluebird';
 import { doInvoke } from '../actions/ipcRequest';
 import { v4 } from 'uuid';
 // import { getMessages, getChannel, getMe } from './selectors/chatChannel';
+import { NEW_CHANNELS_NAME } from '../libs/constants';
 
 Promise.config({
   warnings: true,
@@ -14,10 +15,12 @@ Promise.config({
   asyncHooks: true,
 });
 
+
 const mapStateToProps = (state) => {
+  console.log('MO FULL STATE', NEW_CHANNELS_NAME, state);
   return {
     alerts: state.alerts,
-    channels: state.channels.channels
+    channels: state[NEW_CHANNELS_NAME].channels
   }
 };
 

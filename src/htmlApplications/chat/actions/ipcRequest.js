@@ -29,14 +29,13 @@ export const doInvoke = (...originalArgs) => {
     requestCnt++;
     const requestId = `REQ_${requestCnt}`;
     dispatch(ipcRequestStarted(request, requestId, arg));
-    return Promise.resolve().timeout(250)
+    return Promise.resolve()
       .then(
         () => {
           // console.log('Requesting', request, arg);
           return ipcRenderer.invoke(request, ...arg);
         }
       )
-      .timeout(2500)
       .then(
         (response) => {
           // console.log('response', request, arg, response);
@@ -48,7 +47,7 @@ export const doInvoke = (...originalArgs) => {
         (response) => {
           // console.log('IPC RESPONSE', response);
           if (response && response.error) {
-            throw new Error(response.error);
+            throw new Error(response.errorMessage || 'Generic error');
           }
           if (callback && typeof callback === 'function') {
             callback(null, response, request, requestId);

@@ -183,6 +183,14 @@
   text-align: right;
 }
 
+.chatApp__convMessageValue img {
+  max-width: 150px;
+}
+
+.chatApp__convMessageItem {
+  margin-top: 1px;
+}
+
 .chatApp_convMessageItem--last .chatApp__convMessageValue {
   border-bottom-right-radius: 10px;
   border-bottom-left-radius: 10px;

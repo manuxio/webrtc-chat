@@ -18,6 +18,7 @@ export default (app, appState, appConfig, runningApps, appSockets) => {
       socket.emit(remoteChannelName, options, (reply) => {
         const end = new Date();
         log.debug(`Reply for ${remoteChannelName}, after ${end-start}ms`);
+        log.debug('reply', reply);
         resolve(reply);
       });
     });

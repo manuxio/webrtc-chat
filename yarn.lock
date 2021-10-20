@@ -11315,6 +11315,16 @@ quill-emoji@^0.2.0:
     emoji-data-css "^1.0.1"
     fuse.js "^3.3.0"
 
+quill-image-drop-and-paste@^1.2.9:
+  version "1.2.9"
+  resolved "https://registry.yarnpkg.com/quill-image-drop-and-paste/-/quill-image-drop-and-paste-1.2.9.tgz#900c606cb7f682a328a2c9c75e3c1c2b96d89f72"
+  integrity sha512-NZ3hWRL8IL8/qg2wpMm1NPmA3S0vwQEJj8NVvTbKMHJ2j2rpDXbxhVYVWmyaD6ERgw1U8kKqWmQfUhzVpE13lA==
+
+quill-image-uploader@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/quill-image-uploader/-/quill-image-uploader-1.2.2.tgz#ef4722f0394fbbcdef937d9ad29b4b43e2f5c3f3"
+  integrity sha512-23jM2SVJC2W4hCXre4PX1hy4Lk3fBNVIognvHoyKTLl0AjQOiCSnsoIoUSnS2+9+wxvZIk6ET/cMVvtwpERa6g==
+
 quill-mention@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/quill-mention/-/quill-mention-3.0.4.tgz#0865128c1e3b5cc5c36fa1932596cb442df31da1"

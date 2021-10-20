@@ -1,5 +1,8 @@
 import ReactQuill, { Quill } from 'react-quill';
 import AutoLinks from 'quill-auto-links';
+import ImageUploader from "quill-image-uploader";
+
+Quill.register("modules/imageUploader", ImageUploader);
 
 import { useEffect, useRef, useState, React } from 'react';
 import 'react-quill/dist/quill.snow.css';
@@ -15,6 +18,8 @@ import { NodeHtmlMarkdown } from 'node-html-markdown';
 // console.log('quillEmojiMartPicker', Emoji);
 // const turndownService = new TurndownService();
 Quill.register('modules/autoLinks', AutoLinks);
+Quill.register("modules/imageUploader", ImageUploader);
+// Quill.register('modules/imageDropAndPaste', QuillImageDropAndPaste)
 
 // import { Emoji, EmojiBlot } from '../../../extra/quill-emoji-mart-picker';
 import { emojis } from '../../../extra/quill-emoji-mart-picker';
@@ -64,7 +69,7 @@ const modules = {
     },
   toolbar: [
     ["bold", "italic", "underline", "strike", "blockquote"],
-    [{ list: "ordered" }, { list: "bullet" }, 'link'],
+    [{ list: "ordered" }, { list: "bullet" }, 'link', 'image'],
   ],
   'emoji-module': {
      emojiData: emojis,
@@ -126,6 +131,35 @@ export default function Editor({ channelName, tags, onSubmit, passEditor }) {
     }, 1);
   }
 
+  modules.imageUploader = {
+    upload: file => {
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        fetch(
+          "https://api.imgbb.com/1/upload?key=d36eb6591370ae7f9089d85875e56b22",
+          {
+            method: "POST",
+            body: formData
+          }
+        )
+          .then(response => response.json())
+          .then(result => {
+            console.log(result);
+            resolve(result.data.url);
+          })
+          .catch(error => {
+            reject("Upload failed");
+            console.error("Error:", error);
+          });
+      });
+    }
+  }
+
+  // modules.imageDropAndPaste = {
+  //   handler: imageHandler
+  // }
 
   // function onHandleSubmit(e) {
   //   e.preventDefault();
